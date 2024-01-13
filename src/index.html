@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <div>
+        <label for="expense-title">Expense Title:</label>
+        <input
+          type="text"
+          name="expense-title"
+          id="expense-title"
+          placeholder="Expense Title"
+          required
+        />
+      </div>
+      <div>
+        <label for="expense-amount">Expense Amount:</label>
+        <input
+          type="number"
+          name="expense-amount"
+          id="expense-amount"
+          placeholder="Expense Amount"
+          required
+        />
+      </div>
+
+      <div>
+        <div>
+          <label for="expense-category">Choose/Create a category:</label>
+          <select name="expense-category" id="expense-category" required>
+            <!-- <option value="">--Please choose an category--</option>
+            <option value="dog">Dog</option> -->
+          </select>
+        </div>
+        <div id="expense-category-custom" hidden>
+          <label for="expense-category-custom-text">Others:</label>
+          <input
+            type="text"
+            name="expense-category-custom-text"
+            id="expense-category-custom-text"
+            placeholder="Create Your Custom Category"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="expense-sub">Sub-Expense:</label>
+        <input
+          type="text"
+          name="expense-sub"
+          id="expense-sub"
+          placeholder="Sub-Expense"
+        />
+      </div>
+
+      <div>
+        <button id="add-expense-button">Add Expense</button>
+      </div>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+      integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="index.js"></script>
+  </body>
+</html>

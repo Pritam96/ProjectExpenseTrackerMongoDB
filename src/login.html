@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+  </head>
+  <body>
+    <input
+      type="text"
+      name="email"
+      id="email"
+      placeholder="Enter Your Email ID"
+    />
+    <input
+      type="password"
+      name="password"
+      id="password"
+      placeholder="Your Password"
+    />
+    <button id="login-button">Login</button>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+      integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      const enteredEmail = document.getElementById("email");
+      const enteredPassword = document.getElementById("password");
+      const loginButton = document.getElementById("login-button");
+
+      loginButton.addEventListener("click", async () => {
+        if (enteredEmail.value === "" || enteredPassword.value === "") {
+          alert("Missing required fields");
+          return;
+        }
+        try {
+          const response = await axios.post(
+            "http://localhost:5000/api/auth/login",
+            {
+              email: enteredEmail.value.trim().toLowerCase(),
+              password: enteredPassword.value.trim(),
+            }
+          );
+          alert("Login is successful");
+          localStorage.setItem("token", response.data.token);
+          window.location.href = "./index.html";
+        } catch (error) {
+          alert("Invalid Credentials");
+          window.location.href("./login.html");
+        }
+      });
+    </script>
+  </body>
+</html>
