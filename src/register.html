@@ -15,10 +15,23 @@
   <body
     class="container mt-5 d-flex justify-content-center align-items-center vh-100"
   >
-    <div class="login-form p-4 card col-sm-10 col-md-8 col-lg-6 col-xl-6">
+    <div class="register-form p-4 card col-sm-10 col-md-8 col-lg-6 col-xl-6">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input
+          type="text"
+          class="form-control mb-3"
+          name="username"
+          id="username"
+        />
+      </div>
       <div class="form-group">
         <label for="email">Email ID:</label>
         <input type="text" class="form-control mb-3" name="email" id="email" />
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="text" class="form-control mb-3" name="phone" id="phone" />
       </div>
       <div class="form-group">
         <label for="password">Password:</label>
@@ -30,8 +43,8 @@
         />
       </div>
       <div class="form-group">
-        <button class="btn btn-primary btn-block" id="login-button">
-          Login
+        <button class="btn btn-primary btn-block" id="register-button">
+          Register
         </button>
       </div>
     </div>

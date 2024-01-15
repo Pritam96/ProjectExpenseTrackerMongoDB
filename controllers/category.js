@@ -18,7 +18,7 @@ exports.getCategories = async (req, res, next) => {
   try {
     const categories = await Category.find({
       $or: [{ user: req.user._id }, { user: null }],
-    }).sort({ updatedAt: -1 });
+    }).sort({ updatedAt: 1 });
 
     res.status(200).json({
       success: true,
