@@ -2,7 +2,7 @@ const enteredEmail = document.getElementById("email");
 const enteredPassword = document.getElementById("password");
 const loginButton = document.getElementById("login-button");
 
-if (loginButton && enteredEmail && enteredPassword)
+if (loginButton && enteredEmail && enteredPassword) {
   loginButton.addEventListener("click", async () => {
     if (enteredEmail.value === "" || enteredPassword.value === "") {
       alert("Missing required fields");
@@ -24,6 +24,7 @@ if (loginButton && enteredEmail && enteredPassword)
       window.location.href("./login.html");
     }
   });
+}
 
 const registerButton = document.getElementById("register-button");
 const enteredUsername = document.getElementById("username");
@@ -35,7 +36,7 @@ if (
   enteredPassword &&
   enteredUsername &&
   enteredPhoneNumber
-)
+) {
   registerButton.addEventListener("click", async () => {
     if (
       enteredEmail.value === "" ||
@@ -64,3 +65,33 @@ if (
       window.location.href("./login.html");
     }
   });
+}
+
+const sendResetLinkButton = document.getElementById("forgot-button");
+
+if (sendResetLinkButton && enteredEmail) {
+  sendResetLinkButton.addEventListener("click", async () => {
+    if (enteredEmail.value === "") {
+      alert("Email Id is missing");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/forgotPassword",
+        {
+          email: enteredEmail.value.trim().toLowerCase(),
+        }
+      );
+      console.log(response);
+      if (response.data.success) {
+        alert(
+          "Email with password reset link send successfully. Please check your inbox!"
+        );
+        enteredEmail.value = "";
+      }
+    } catch (error) {
+      if (error.response) alert(error.response.data.error);
+      else console.log(error);
+    }
+  });
+}
