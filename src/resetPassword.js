@@ -16,6 +16,8 @@ saveNewPasswordButton.addEventListener("click", async () => {
   }
   if (enteredPassword.value !== enteredConfirmPassword.value) {
     alert("Password not matched!");
+    enteredPassword.value = "";
+    enteredConfirmPassword.value = "";
     return;
   }
   try {
@@ -31,6 +33,7 @@ saveNewPasswordButton.addEventListener("click", async () => {
     resetToken.value = "";
     enteredPassword.value = "";
     enteredConfirmPassword.value = "";
+    window.location.replace("./login.html");
   } catch (error) {
     if (error.response) alert(error.response.data.error);
     else console.log(error);

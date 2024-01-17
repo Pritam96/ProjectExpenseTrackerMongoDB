@@ -105,12 +105,14 @@ exports.resetPassword = async (req, res, next) => {
 exports.setNewPassword = async (req, res, next) => {
   const { resetToken } = req.params;
   const hostUrl = `${req.protocol}://${req.get("host")}`;
-  res.status(200).send(`<!DOCTYPE html>
+  res.status(200).send(`
+  <!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Login</title>
+      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+      <script src="https://kit.fontawesome.com/3da1a747b2.js"></script>
       <!-- Add Bootstrap CSS -->
       <link
         rel="stylesheet"
@@ -118,44 +120,104 @@ exports.setNewPassword = async (req, res, next) => {
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous"
       />
+      <!-- <link rel="stylesheet" href="css/style.css" /> -->
+      <title>ExpenseTrack | Track and Manage Your Expenses with Ease</title>
     </head>
-    <body
-      class="container mt-5 d-flex justify-content-center align-items-center vh-100"
-    >
-      <div class="login-form p-4 card col-sm-10 col-md-8 col-lg-6 col-xl-6">
-        <input
-          type="text"
-          name="reset-token"
-          id="reset-token"
-          value="${resetToken}"
-        />
-        <div class="form-group">
-          <label for="password">New Password:</label>
-          <input
-            type="password"
-            class="form-control mb-3"
-            name="password"
-            id="password"
-          />
-        </div>
-        <div class="form-group">
-          <label for="confirm-password">Confirm Password:</label>
-          <input
-            type="password"
-            class="form-control mb-3"
-            name="confirm-password"
-            id="confirm-password"
-          />
-        </div>
-        <div class="form-group">
-          <button class="btn btn-primary btn-block" id="save-password-button">
-            Save
+    <body>
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <div class="container">
+          <a class="navbar-brand" href="${hostUrl}/index.html"
+            ><i class="fas fa-wallet"></i> ExpenseTrack</a
+          >
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+          >
+            <span class="navbar-toggler-icon"></span>
           </button>
+  
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="${hostUrl}/login.html"
+                  ><i class="fas fa-sign-in-alt"></i> Login</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${hostUrl}/register.html"
+                  ><i class="fas fa-user-plus"></i> Register</a
+                >
+              </li>
+              <!-- <li class="nav-item d-none d-sm-block">
+                <a class="nav-link" href="#">|</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${hostUrl}/bootcamps.html">Browse Bootcamps</a>
+              </li> -->
+            </ul>
+          </div>
         </div>
-        <div class="form-group">
-          <a href="${hostUrl}/login.html">Back to Login</a>
+      </nav>
+  
+      <section class="container mt-5">
+        <div class="row">
+          <div class="col-md-8 m-auto">
+            <div class="card bg-white py-2 px-4">
+              <div class="card-body">
+                <a href="${hostUrl}/login.html">Back to login</a>
+                <h1 class="mb-2">Reset Password</h1>
+                <p>
+                  Use this form to reset your password using the registered email
+                  address.
+                </p>
+                <div>
+                  <input
+                    type="hidden"
+                    name="reset-token"
+                    id="reset-token"
+                    value="${resetToken}"
+                  />
+                  <div class="form-group">
+                    <label for="password">New Password</label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      class="form-control"
+                      placeholder="Enter new password"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input
+                      type="password"
+                      id="confirm-password"
+                      name="confirm-password"
+                      class="form-control"
+                      placeholder="Confirm new password"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <button
+                      type="submit"
+                      id="save-password-button"
+                      class="btn btn-dark btn-block"
+                    >
+                      Reset Password
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+  
       <script
         src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
         integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
@@ -177,13 +239,6 @@ exports.setNewPassword = async (req, res, next) => {
         src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"
-      ></script>
-  
-      <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
-        integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"
       ></script>
       <script>
         const saveNewPasswordButton = document.getElementById(
@@ -210,6 +265,8 @@ exports.setNewPassword = async (req, res, next) => {
           }
           if (enteredPassword.value !== enteredConfirmPassword.value) {
             alert("Password not matched!");
+            enteredPassword.value='';
+            enteredConfirmPassword.value='';
             return;
           }
           try {
@@ -225,6 +282,7 @@ exports.setNewPassword = async (req, res, next) => {
             resetToken.value = "";
             enteredPassword.value = "";
             enteredConfirmPassword.value = "";
+            window.location.replace("${hostUrl}/login.html");
           } catch (error) {
             if (error.response) alert(error.response.data.error);
             else console.log(error);
@@ -232,6 +290,6 @@ exports.setNewPassword = async (req, res, next) => {
         });
       </script>
     </body>
-  </html>
+  </html>  
   `);
 };

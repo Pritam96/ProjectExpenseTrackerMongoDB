@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://kit.fontawesome.com/3da1a747b2.js"></script>
     <!-- Add Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -11,46 +12,121 @@
       integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
       crossorigin="anonymous"
     />
+    <!-- <link rel="stylesheet" href="css/style.css" /> -->
+    <title>ExpenseTrack | Track and Manage Your Expenses with Ease</title>
   </head>
-  <body
-    class="container mt-5 d-flex justify-content-center align-items-center vh-100"
-  >
-    <div class="register-form p-4 card col-sm-10 col-md-8 col-lg-6 col-xl-6">
-      <div class="form-group">
-        <label for="username">Username:</label>
-        <input
-          type="text"
-          class="form-control mb-3"
-          name="username"
-          id="username"
-        />
-      </div>
-      <div class="form-group">
-        <label for="email">Email ID:</label>
-        <input type="text" class="form-control mb-3" name="email" id="email" />
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone Number:</label>
-        <input type="text" class="form-control mb-3" name="phone" id="phone" />
-      </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input
-          type="password"
-          class="form-control mb-3"
-          name="password"
-          id="password"
-        />
-      </div>
-      <div class="form-group">
-        <button class="btn btn-primary btn-block" id="register-button">
-          Register
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="index.html"
+          ><i class="fas fa-wallet"></i> ExpenseTrack</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+        >
+          <span class="navbar-toggler-icon"></span>
         </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="login.html"
+                ><i class="fas fa-sign-in-alt"></i> Login</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="register.html"
+                ><i class="fas fa-user-plus"></i> Register</a
+              >
+            </li>
+            <!-- <li class="nav-item d-none d-sm-block">
+              <a class="nav-link" href="#">|</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="bootcamps.html">Browse Bootcamps</a>
+            </li> -->
+          </ul>
+        </div>
       </div>
-      <div class="form-group">
-        <a href="login.html">Already have a account?</a>
+    </nav>
+
+    <!-- Register -->
+    <section class="form mt-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 m-auto">
+            <div class="card bg-white p-4 mb-4">
+              <div class="card-body">
+                <h1><i class="fas fa-user-plus"></i> Register</h1>
+                <p>
+                  Register to Record, Review, and Organize Your Financial
+                  Transactions
+                </p>
+                <div>
+                  <div class="form-group">
+                    <label for="name">Name</label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="name"
+                      class="form-control"
+                      placeholder="Enter full name"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      class="form-control"
+                      placeholder="Enter email"
+                      required
+                    />
+                  </div>
+                  <div class="form-group mb-4">
+                    <label for="phone">Phone</label>
+                    <input
+                      type="text"
+                      id="phone"
+                      name="phone"
+                      class="form-control"
+                      placeholder="Enter Phone No"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      class="form-control"
+                      placeholder="Enter password"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <button
+                      id="register-button"
+                      class="btn btn-primary btn-block"
+                    >
+                      Register
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
       integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
@@ -72,13 +148,6 @@
       src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
-    ></script>
-
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
-      integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
     ></script>
     <script src="./auth.js"></script>
   </body>

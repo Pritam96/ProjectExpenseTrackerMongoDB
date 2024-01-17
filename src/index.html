@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Expense Tracker</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://kit.fontawesome.com/3da1a747b2.js"></script>
     <!-- Add Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -11,146 +12,202 @@
       integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
       crossorigin="anonymous"
     />
-    <style>
-      .list-group {
-        height: 80vh;
-        overflow-y: scroll;
-      }
-    </style>
+    <!-- <link rel="stylesheet" href="css/style.css" /> -->
+    <title>ExpenseTrack | Track and Manage Your Expenses with Ease</title>
   </head>
-  <body class="container mt-5">
-    <div class="row">
-      <div class="expense-form card p-4 col-md-6 col-lg-6 col-xl-4">
-        <div>
-          <!-- hidden id field -->
-          <input type="hidden" name="expense-Id" id="expense-Id" />
-        </div>
-        <div class="form-group">
-          <label for="expense-title">Expense Title:</label>
-          <input
-            type="text"
-            class="form-control"
-            name="expense-title"
-            id="expense-title"
-            placeholder="Expense Title"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="expense-amount">Expense Amount:</label>
-          <input
-            type="number"
-            class="form-control"
-            name="expense-amount"
-            id="expense-amount"
-            placeholder="Expense Amount"
-            required
-          />
-        </div>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="index.html"
+          ><i class="fas fa-wallet"></i> ExpenseTrack</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <div class="form-group">
-          <div>
-            <label for="expense-category">Choose a category:</label>
-            <select
-              class="form-control"
-              name="expense-category"
-              id="expense-category"
-              required
-            >
-              <!-- <option value="">--Please choose an category--</option>
-              <option value="dog">Dog</option> -->
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group" id="expense-category-custom" hidden>
-          <div>
-            <label for="expense-category-custom-text"
-              >Specify a category:</label
-            >
-            <input
-              type="text"
-              class="form-control"
-              name="expense-category-custom-text"
-              id="expense-category-custom-text"
-              placeholder="Create Your Custom Category"
-            />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="expense-sub">Sub-Expense:</label>
-          <input
-            type="text"
-            class="form-control"
-            name="expense-sub"
-            id="expense-sub"
-            placeholder="Sub-Expense"
-          />
-        </div>
-
-        <div class="form-group" id="add-or-edit-button-section">
-          <button class="btn btn-primary" id="add-or-edit-expense-button">
-            Add Expense
-          </button>
-        </div>
-        <div class="form-group">
-          <button class="btn btn-secondary" id="reset-expense-button">
-            Reset
-          </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-toggle="dropdown"
+              >
+                <i class="fas fa-user"></i> Account
+              </a>
+              <div class="dropdown-menu">
+                <!-- <a class="dropdown-item" href="manage-bootcamp.html"
+                  >Manage Bootcamp</a
+                >
+                <a class="dropdown-item" href="manage-reviews.html"
+                  >Manage Reviews</a
+                >
+                <a class="dropdown-item" href="manage-account.html"
+                  >Manage Account</a
+                > -->
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" onclick="logoutHandler()"
+                  ><i class="fas fa-sign-out-alt"></i> Logout</a
+                >
+              </div>
+            </li>
+            <!-- <li class="nav-item d-none d-sm-block">
+              <a class="nav-link" href="#">|</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="bootcamps.html">Browse Bootcamps</a>
+            </li> -->
+          </ul>
         </div>
       </div>
+    </nav>
 
-      <div
-        class="col-md-6 offset-md-0 col-lg-6 offset-lg-0 col-xl-8 offset-xl-0"
-        id="expense-list"
-      >
-        <!-- <h4 class="mb-3 mt-3">Expense List</h4>
-        <div class="card list-group">
-          <li class="expense-data list-group-item">
-            <div class="expense-data-row list-group-item">
-              <div class="expense-data-col">
-                <span class="expense-data-col__amount font-weight-bold"
-                  >Amount: </span
-                >2000
+    <section class="browse my-5">
+      <div class="container">
+        <div class="row">
+          <!-- Sidebar -->
+          <div class="col-md-4 mb-3">
+            <h4>Add Expense</h4>
+            <div>
+              <input type="hidden" name="expense-id" id="expense-id" />
+              <div class="form-group">
+                <label for="expense-title"> Title</label>
+                <input
+                  type="text"
+                  id="expense-title"
+                  name="expense-title"
+                  class="form-control"
+                  placeholder="Enter title"
+                  required
+                />
               </div>
-              <div class="expense-data-col">
-                <span class="expense-data-col__statement font-weight-bold"
-                  >Title: </span
-                >Electricity Bill January
+
+              <div class="form-group">
+                <label for="expense-amount"> Amount</label>
+                <input
+                  type="text"
+                  id="expense-amount"
+                  name="expense-amount"
+                  class="form-control"
+                  placeholder="Enter amount"
+                  required
+                />
               </div>
-              <div class="expense-data-col">
-                <span class="expense-data-col__category font-weight-bold"
-                  >Category: </span
-                >Bills &amp; Recharge
+
+              <div class="form-group">
+                <label> Category</label>
+                <select class="custom-select mb-2" id="expense-category">
+                  <!-- <option value="any" selected>Any</option>
+                  <option value="9">9+</option>
+                  <option value="8">8+</option>
+                  <option value="7">7+</option>
+                  <option value="6">6+</option>
+                  <option value="5">5+</option>
+                  <option value="4">4+</option>
+                  <option value="3">3+</option>
+                  <option value="2">2+</option> -->
+                </select>
               </div>
-              <div class="expense-data-col">
-                <span class="expense-data-col__sub-expense font-weight-bold"
-                  >Sub-Expense: </span
-                >Quarterly Bills
-              </div>
-              <div class="expense-data-col">
-                <span class="expense-data-col__created font-weight-bold"
-                  >Created: </span
-                >2024-01-14T04:41:44.588Z
-              </div>
-              <div class="expense-data-col text-right">
-                <button
-                  class="expense-data-col__edit-button btn btn-sm btn-info"
+
+              <div class="form-group" id="expense-category-custom" hidden>
+                <label for="expense-category-custom-text">
+                  Custom category</label
                 >
-                  Edit</button
-                ><button
-                  class="expense-data-col__delete-button btn btn-sm btn-danger ml-2"
-                >
-                  Delete
-                </button>
+                <input
+                  type="text"
+                  id="expense-category-custom-text"
+                  name="expense-category-custom-text"
+                  class="form-control"
+                  placeholder="Enter category"
+                  required
+                />
               </div>
+
+              <div class="form-group">
+                <label for="expense-sub"> Description</label>
+                <input
+                  type="text"
+                  id="expense-sub"
+                  name="expense-sub"
+                  class="form-control"
+                  placeholder="Enter description"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                id="add-or-edit-expense-button"
+                class="btn btn-primary btn-block"
+              >
+                Save Expense
+              </button>
             </div>
-          </li>
-        </div> -->
-      </div>
-    </div>
+          </div>
+          <!-- Main col -->
+          <div class="col-md-8">
+            <!-- Expenses -->
+            <div id="expense-list">
+              <!-- <div class="card mb-3">
+                <div class="row no-gutters">
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h4 class="card-title">$20</h4>
+                      <p class="card-subtitle mb-2 text-muted">
+                        Electricity Bill January
+                      </p>
+                      <p class="card-text">Quarterly Bills</p>
+                      <span class="badge badge-dark mb-2">2024-01-14</span>
+                      <span class="badge badge-success">Bills & Recharge</span>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card-body float-right">
+                      <button class="btn btn-sm btn-info btn-block">
+                        Edit
+                      </button>
+                      <button class="btn btn-sm btn-danger btn-block">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+            </div>
 
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example">
+              <ul class="pagination">
+                <li class="page-item">
+                  <a class="page-link" href="#">Previous</a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                  <a class="page-link" href="#">Next</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+      integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <!-- Add Bootstrap JS (popper.js is required for some Bootstrap components) -->
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -167,13 +224,8 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
-
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
-      integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+    <!-- moment.js -->
+    <script src="moment.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

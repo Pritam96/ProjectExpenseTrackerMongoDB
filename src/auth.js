@@ -18,10 +18,10 @@ if (loginButton && enteredEmail && enteredPassword) {
       );
       alert("Login is successful");
       localStorage.setItem("token", response.data.token);
-      window.location.href = "./index.html";
+      window.location.replace("./index.html");
     } catch (error) {
       alert("Invalid Credentials");
-      window.location.href("./login.html");
+      window.location.replace("./login.html");
     }
   });
 }
@@ -59,10 +59,10 @@ if (
       );
       alert("Registration is successful");
       localStorage.setItem("token", response.data.token);
-      window.location.href = "./index.html";
+      window.location.replace("./index.html");
     } catch (error) {
       alert("Invalid Credentials");
-      window.location.href("./login.html");
+      window.location.replace("./login.html");
     }
   });
 }
@@ -88,6 +88,7 @@ if (sendResetLinkButton && enteredEmail) {
           "Email with password reset link send successfully. Please check your inbox!"
         );
         enteredEmail.value = "";
+        window.location.replace("./login.html");
       }
     } catch (error) {
       if (error.response) alert(error.response.data.error);

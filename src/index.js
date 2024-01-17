@@ -65,7 +65,7 @@ const createEditExpenseButton = document.getElementById(
 createEditExpenseButton.addEventListener("click", createOrEditExpense);
 
 async function createOrEditExpense() {
-  const expenseId = document.getElementById("expense-Id");
+  const expenseId = document.getElementById("expense-id");
   const expenseTitle = document.getElementById("expense-title");
   const expenseAmount = document.getElementById("expense-amount");
   const selectedCategory = document.getElementById("expense-category");
@@ -161,146 +161,81 @@ function populateExpenses(expenses) {
   const expenseList = document.getElementById("expense-list");
   expenseList.innerText = "";
 
-  const hElementExpenseList = document.createElement("h4");
-  hElementExpenseList.innerText = "Expense List";
-  hElementExpenseList.classList.add("mb-3", "mt-3");
-  expenseList.appendChild(hElementExpenseList);
-
-  const divElementListGroup = document.createElement("div");
-  divElementListGroup.classList.add("card", "list-group");
-  expenseList.appendChild(divElementListGroup);
-
   expenses.forEach((expense) => {
-    const liElementListGroupItem = document.createElement("li");
-    liElementListGroupItem.classList.add("expense-data", "list-group-item");
-    divElementListGroup.appendChild(liElementListGroupItem);
+    const divCard = document.createElement("div");
+    divCard.classList.add("card", "mb-3");
+    expenseList.appendChild(divCard);
 
-    const divElementExpenseDataRow = document.createElement("div");
-    divElementExpenseDataRow.classList.add(
-      "expense-data-row",
-      "list-group-item"
-    );
-    liElementListGroupItem.appendChild(divElementExpenseDataRow);
+    const divRow = document.createElement("div");
+    divRow.classList.add("row", "no-gutters");
+    divCard.appendChild(divRow);
 
-    const divElementColAmount = document.createElement("div");
-    // divElementColAmount.classList.add("expense-data-col", "col-lg-2");
-    divElementColAmount.classList.add("expense-data-col");
-    divElementExpenseDataRow.appendChild(divElementColAmount);
+    const divColInfo = document.createElement("div");
+    divColInfo.classList.add("col-md-8");
+    divRow.appendChild(divColInfo);
 
-    const spanElementColAmount = document.createElement("span");
-    spanElementColAmount.classList.add(
-      "expense-data-col__amount",
-      "font-weight-bold"
-    );
-    spanElementColAmount.innerText = "Amount: ";
-    divElementColAmount.appendChild(spanElementColAmount);
-    divElementColAmount.appendChild(document.createTextNode(expense.amount));
+    const divColAction = document.createElement("div");
+    divColAction.classList.add("col-md-4");
+    divRow.appendChild(divColAction);
 
-    const divElementColStatement = document.createElement("div");
-    // divElementColStatement.classList.add("expense-data-col", "col-lg-3");
-    divElementColStatement.classList.add("expense-data-col");
-    divElementExpenseDataRow.appendChild(divElementColStatement);
+    const divCardBodyInfo = document.createElement("div");
+    divCardBodyInfo.classList.add("card-body");
+    divColInfo.appendChild(divCardBodyInfo);
 
-    const spanElementColStatement = document.createElement("span");
-    spanElementColStatement.classList.add(
-      "expense-data-col__statement",
-      "font-weight-bold"
-    );
-    spanElementColStatement.innerText = "Title: ";
-    divElementColStatement.appendChild(spanElementColStatement);
-    divElementColStatement.appendChild(
-      document.createTextNode(expense.statement)
-    );
+    const hCardTitleAmount = document.createElement("h4");
+    hCardTitleAmount.classList.add("card-title");
+    hCardTitleAmount.innerText = `₹${expense.amount}`;
+    divCardBodyInfo.appendChild(hCardTitleAmount);
 
-    const divElementColCategory = document.createElement("div");
-    // divElementColCategory.classList.add("expense-data-col", "col-lg-2");
-    divElementColCategory.classList.add("expense-data-col");
-
-    divElementExpenseDataRow.appendChild(divElementColCategory);
-
-    const spanElementColCategory = document.createElement("span");
-    spanElementColCategory.classList.add(
-      "expense-data-col__category",
-      "font-weight-bold"
-    );
-    spanElementColCategory.innerText = "Category: ";
-    divElementColCategory.appendChild(spanElementColCategory);
-    divElementColCategory.appendChild(
-      document.createTextNode(expense.category.categoryName)
-    );
-
-    const divElementColSubExpense = document.createElement("div");
-    // divElementColSubExpense.classList.add("expense-data-col", "col-lg-2");
-    divElementColSubExpense.classList.add("expense-data-col");
-    divElementExpenseDataRow.appendChild(divElementColSubExpense);
+    const pCardSubtitleStatement = document.createElement("p");
+    pCardSubtitleStatement.classList.add("card-subtitle", "mb-2", "text-muted");
+    pCardSubtitleStatement.innerText = expense.statement;
+    divCardBodyInfo.appendChild(pCardSubtitleStatement);
 
     if (expense.subExpense) {
-      const spanElementColSubExpense = document.createElement("span");
-      spanElementColSubExpense.classList.add(
-        "expense-data-col__sub-expense",
-        "font-weight-bold"
-      );
-      spanElementColSubExpense.innerText = "Sub-Expense: ";
-      divElementColSubExpense.appendChild(spanElementColSubExpense);
-      divElementColSubExpense.appendChild(
-        document.createTextNode(expense.subExpense)
-      );
+      const pCardTextSubExpense = document.createElement("p");
+      pCardTextSubExpense.classList.add("card-text");
+      pCardTextSubExpense.innerText = expense.subExpense;
+      divCardBodyInfo.appendChild(pCardTextSubExpense);
     }
 
-    const divElementColCreatedAt = document.createElement("div");
-    // divElementColCreatedAt.classList.add("expense-data-col", "col-lg-2");
-    divElementColCreatedAt.classList.add("expense-data-col");
-
-    divElementExpenseDataRow.appendChild(divElementColCreatedAt);
-
-    const spanElementColCreatedAt = document.createElement("span");
-    spanElementColCreatedAt.classList.add(
-      "expense-data-col__created",
-      "font-weight-bold"
+    const spanBadgeCreatedAt = document.createElement("span");
+    spanBadgeCreatedAt.classList.add("badge", "badge-dark", "mb-2", "mr-2");
+    spanBadgeCreatedAt.innerText = moment(expense.createdAt).format(
+      "MMMM Do YYYY, h:mm:ss a"
     );
-    spanElementColCreatedAt.innerText = "Created: ";
-    divElementColCreatedAt.appendChild(spanElementColCreatedAt);
-    divElementColCreatedAt.appendChild(
-      document.createTextNode(expense.createdAt)
-    );
+    divCardBodyInfo.appendChild(spanBadgeCreatedAt);
 
-    const divElementColButtons = document.createElement("div");
-    divElementColButtons.classList.add("expense-data-col", "text-right");
-    divElementExpenseDataRow.appendChild(divElementColButtons);
+    const spanBadgeCategory = document.createElement("span");
+    spanBadgeCategory.classList.add("badge", "badge-success");
+    spanBadgeCategory.innerText = expense.category.categoryName;
+    divCardBodyInfo.appendChild(spanBadgeCategory);
 
-    const buttonElementEdit = document.createElement("button");
-    buttonElementEdit.classList.add(
-      "expense-data-col__edit-button",
-      "btn",
-      "btn-sm",
-      "btn-info"
-    );
-    buttonElementEdit.innerText = "Edit";
-    divElementColButtons.appendChild(buttonElementEdit);
+    const divCardBodyAction = document.createElement("div");
+    divCardBodyAction.classList.add("card-body", "float-right");
+    divColAction.appendChild(divCardBodyAction);
 
-    const buttonElementDelete = document.createElement("button");
-    buttonElementDelete.classList.add(
-      "expense-data-col__delete-button",
-      "btn",
-      "btn-sm",
-      "btn-danger",
-      "ml-2"
-    );
-    buttonElementDelete.innerText = "Delete";
-    divElementColButtons.appendChild(buttonElementDelete);
+    const buttonEdit = document.createElement("button");
+    buttonEdit.classList.add("btn", "btn-sm", "btn-info", "btn-block");
+    buttonEdit.innerText = "Edit";
+    divCardBodyAction.appendChild(buttonEdit);
 
-    buttonElementEdit.addEventListener("click", () => {
+    const buttonDelete = document.createElement("button");
+    buttonDelete.classList.add("btn", "btn-sm", "btn-danger", "btn-block");
+    buttonDelete.innerText = "Delete";
+    divCardBodyAction.appendChild(buttonDelete);
+
+    buttonEdit.addEventListener("click", () => {
       populateExpenseForEdit(expense);
     });
-
-    buttonElementDelete.addEventListener("click", () => {
+    buttonDelete.addEventListener("click", () => {
       deleteExpense(expense);
     });
   });
 }
 
 function populateExpenseForEdit(expense) {
-  const expenseId = document.getElementById("expense-Id");
+  const expenseId = document.getElementById("expense-id");
   const expenseTitle = document.getElementById("expense-title");
   const expenseAmount = document.getElementById("expense-amount");
   const selectedCategory = document.getElementById("expense-category");
@@ -312,15 +247,15 @@ function populateExpenseForEdit(expense) {
   selectedCategory.value = expense.category._id;
   if (expense.subExpense) subExpense.value = expense.subExpense;
 
-  createEditExpenseButton.innerText = "Save Expense";
+  createEditExpenseButton.innerText = "Edit Expense";
 }
 
 // Reset Button
-const resetExpenseButton = document.getElementById("reset-expense-button");
-resetExpenseButton.addEventListener("click", resetForm);
+// const resetExpenseButton = document.getElementById("reset-expense-button");
+// resetExpenseButton.addEventListener("click", resetForm);
 
 function resetForm() {
-  const expenseId = document.getElementById("expense-Id");
+  const expenseId = document.getElementById("expense-id");
   const expenseTitle = document.getElementById("expense-title");
   const expenseAmount = document.getElementById("expense-amount");
   const selectedCategory = document.getElementById("expense-category");
@@ -338,7 +273,7 @@ function resetForm() {
   getCategories();
   selectedCategory.selectIndex = 0;
 
-  createEditExpenseButton.innerText = "Add Expense";
+  createEditExpenseButton.innerText = "Save Expense";
 }
 
 async function deleteExpense(expense) {
@@ -358,4 +293,9 @@ async function deleteExpense(expense) {
   } catch (error) {
     console.log(error);
   }
+}
+
+function logoutHandler() {
+  localStorage.removeItem("token");
+  window.location.replace("./login.html");
 }
