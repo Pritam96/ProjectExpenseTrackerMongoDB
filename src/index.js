@@ -13,7 +13,7 @@ if (!token) {
 
 document.addEventListener("DOMContentLoaded", (event) => {
   resetForm();
-  currentUser = getCurrentUser();
+  getCurrentUser();
   getExpenses();
 });
 
@@ -27,6 +27,10 @@ async function getCurrentUser() {
     });
     console.log("Current User:", response.data.data);
     console.log("CURRENT USER FETCHED");
+    currentUser = response.data.data;
+
+    buyPremiumHideUnhide();
+
     return response.data.data;
   } catch (error) {
     console.log(error);
@@ -392,5 +396,14 @@ function loadPagination(pagination) {
         getExpenses(paginationNext.page, paginationNext.limit);
       };
     }
+  }
+}
+
+function buyPremiumHideUnhide() {
+  const buyButton = document.getElementById("buy-button");
+  if (currentUser.isPremium) {
+    buyButton.hidden = true;
+  } else {
+    buyButton.hidden = false;
   }
 }

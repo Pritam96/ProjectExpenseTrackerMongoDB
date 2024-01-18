@@ -8,6 +8,7 @@ const { Schema } = mongoose;
 const UserSchema = new Schema(
   {
     isAdmin: { type: Boolean, default: false },
+    isPremium: { type: Boolean, default: false },
     username: { type: String, required: [true, "Username is required"] },
     email: {
       type: String,

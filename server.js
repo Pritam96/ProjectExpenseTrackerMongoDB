@@ -15,6 +15,7 @@ const auth = require("./routes/auth");
 const user = require("./routes/user");
 const category = require("./routes/category");
 const expense = require("./routes/expense");
+const payment = require("./routes/payment");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api/auth", auth);
 app.use("/api/user", user);
 app.use("/api/category", category);
 app.use("/api/expense", expense);
+app.use("/api/payment", payment);
 
 app.use(errorHandler);
 

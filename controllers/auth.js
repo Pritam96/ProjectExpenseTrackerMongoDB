@@ -59,21 +59,25 @@ exports.forgotPassword = async (req, res, next) => {
       "host"
     )}/api/auth/resetPassword/${resetToken}`;
 
-    const message = `You are receiving this email because you has requested the reset of a password. Please make a PUT request to: \n\n${resetUrl}`;
+    const message = `You are receiving this email because you has requested the reset of a password. Please go to this link: \n\n${resetUrl}`;
 
-    // Sending the un-hashed token to the user by email
-    await sendEmail({
-      email: user.email,
-      subject: "Password reset token",
-      message,
-    });
-    res.status(200).json({ success: true, data: "Email sent successfully" });
+    try {
+      // Sending the un-hashed token to the user by email
+      await sendEmail({
+        email: user.email,
+        subject: "Password reset token",
+        message,
+      });
+      res.status(200).json({ success: true, data: "Email sent successfully" });
+    } catch (err) {
+      console.log(err);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordToken = undefined;
+      await user.save({ validateBeforeSave: false });
+      return next(new ErrorResponse("Email could not be sent", 500));
+    }
   } catch (error) {
-    console.log(error);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordToken = undefined;
-    await user.save({ validateBeforeSave: false });
-    return next(new ErrorResponse("Email could not be sent", 500));
+    next(error);
   }
 };
 
