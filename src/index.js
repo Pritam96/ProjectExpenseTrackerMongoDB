@@ -1,6 +1,11 @@
 const token = localStorage.getItem("token");
 let currentUser;
 
+let paginationNext;
+let paginationPrev;
+let paginationTotal;
+let paginationCurrent;
+
 if (!token) {
   alert("Token is missing");
   window.location.replace("./login.html");
@@ -141,15 +146,27 @@ selectedCategory.addEventListener("change", () => {
   }
 });
 
-async function getExpenses() {
+async function getExpenses(page, limit) {
   try {
-    const response = await axios.get("http://localhost:5000/api/expense", {
+    let url = "http://localhost:5000/api/expense";
+    if (page || limit) {
+      url += "?";
+      if (page) url += `page=${page}`;
+      if (page && limit) url += "&";
+      if (limit) url += `limit=${limit}`;
+    }
+    console.log(url);
+    const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/json;charset=UTF-8",
         Authorization: `Bearer ${token}`,
       },
     });
     console.log("Get Expenses:", response.data.data);
+
+    console.log("Pagination:", response.data.pagination);
+    loadPagination(response.data.pagination);
+
     console.log("EXPENSES FETCHED");
     if (response.data.count !== 0) populateExpenses(response.data.data);
   } catch (error) {
@@ -298,4 +315,82 @@ async function deleteExpense(expense) {
 function logoutHandler() {
   localStorage.removeItem("token");
   window.location.replace("./login.html");
+}
+
+function loadPagination(pagination) {
+  if (JSON.stringify(pagination) !== "{}") {
+    if (pagination.next) {
+      paginationNext = pagination.next;
+    } else {
+      paginationNext = undefined;
+    }
+    if (pagination.prev) {
+      paginationPrev = pagination.prev;
+    } else {
+      paginationPrev = undefined;
+    }
+    paginationTotal = pagination.total;
+    paginationCurrent = pagination.current;
+  }
+
+  const navPagination = document.getElementById("nav-pagination");
+  navPagination.innerText = "";
+
+  if (paginationNext || paginationPrev) {
+    const ulPagination = document.createElement("ul");
+    ulPagination.classList.add("pagination");
+    navPagination.appendChild(ulPagination);
+
+    if (paginationPrev) {
+      const liPageItemPrev = document.createElement("li");
+      liPageItemPrev.classList.add("page-item");
+      ulPagination.appendChild(liPageItemPrev);
+      const aPageLinkPrev = document.createElement("a"); // Previous Link
+      aPageLinkPrev.classList.add("page-link");
+      aPageLinkPrev.innerText = "Previous";
+      liPageItemPrev.appendChild(aPageLinkPrev);
+      aPageLinkPrev.onclick = function () {
+        console.log("Previous clicked. Go to page:", paginationPrev.page);
+        getExpenses(paginationPrev.page, paginationPrev.limit);
+      };
+    }
+
+    if (paginationTotal > 1) {
+      // show all page numbers
+      let start = paginationCurrent || 1;
+      let stop = start + 4 > paginationTotal ? paginationTotal : start + 4;
+      if (paginationTotal)
+        for (let i = start; i <= stop; i++) {
+          const liPageItem = document.createElement("li");
+          liPageItem.classList.add("page-item");
+          ulPagination.appendChild(liPageItem);
+
+          const aPageLink = document.createElement("a");
+          aPageLink.classList.add("page-link");
+          aPageLink.innerText = i;
+          liPageItem.appendChild(aPageLink);
+
+          aPageLink.onclick = function () {
+            console.log("Go to page:", i);
+            getExpenses(i, null);
+          };
+        }
+    }
+
+    if (paginationNext) {
+      const liPageItemNext = document.createElement("li");
+      liPageItemNext.classList.add("page-item");
+      ulPagination.appendChild(liPageItemNext);
+
+      const aPageLinkNext = document.createElement("a"); // Next Link
+      aPageLinkNext.classList.add("page-link");
+      aPageLinkNext.innerText = "Next";
+      liPageItemNext.appendChild(aPageLinkNext);
+
+      aPageLinkNext.onclick = function () {
+        console.log("Next clicked Go to page:", paginationNext.page);
+        getExpenses(paginationNext.page, paginationNext.limit);
+      };
+    }
+  }
 }
