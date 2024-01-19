@@ -1,15 +1,15 @@
-const token = localStorage.getItem("token");
-let currentUser;
+// const token = localStorage.getItem("token");
+// let currentUser;
 
 let paginationNext;
 let paginationPrev;
 let paginationTotal;
 let paginationCurrent;
 
-if (!token) {
-  alert("Token is missing");
-  window.location.replace("./login.html");
-}
+// if (!token) {
+//   alert("Token is missing");
+//   window.location.replace("./login.html");
+// }
 
 document.addEventListener("DOMContentLoaded", (event) => {
   resetForm();
@@ -159,7 +159,7 @@ async function getExpenses(page, limit) {
       if (page && limit) url += "&";
       if (limit) url += `limit=${limit}`;
     }
-    console.log(url);
+
     const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/json;charset=UTF-8",
@@ -173,6 +173,14 @@ async function getExpenses(page, limit) {
 
     console.log("EXPENSES FETCHED");
     if (response.data.count !== 0) populateExpenses(response.data.data);
+    else {
+      const expenseList = document.getElementById("expense-list");
+      expenseList.innerText = "";
+      const pNotFound = document.createElement("p");
+      pNotFound.innerText = "No expenses found!";
+      pNotFound.classList.add("text-center");
+      expenseList.appendChild(pNotFound);
+    }
   } catch (error) {
     console.log(error);
   }
@@ -396,14 +404,5 @@ function loadPagination(pagination) {
         getExpenses(paginationNext.page, paginationNext.limit);
       };
     }
-  }
-}
-
-function buyPremiumHideUnhide() {
-  const buyButton = document.getElementById("buy-button");
-  if (currentUser.isPremium) {
-    buyButton.hidden = true;
-  } else {
-    buyButton.hidden = false;
   }
 }

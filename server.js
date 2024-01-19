@@ -16,6 +16,8 @@ const user = require("./routes/user");
 const category = require("./routes/category");
 const expense = require("./routes/expense");
 const payment = require("./routes/payment");
+const leaderboard = require("./routes/leaderboard");
+const report = require("./routes/report");
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use("/api/user", user);
 app.use("/api/category", category);
 app.use("/api/expense", expense);
 app.use("/api/payment", payment);
+app.use("/api/leaderboard", leaderboard);
+app.use("/api/report", report);
 
 app.use(errorHandler);
 
