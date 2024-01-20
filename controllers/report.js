@@ -1,3 +1,5 @@
+const { Parser } = require("json2csv");
+const moment = require("moment");
 const Expense = require("../models/Expense");
 
 exports.getExpensesByRange = async (req, res, next) => {
@@ -56,6 +58,60 @@ exports.getExpensesByRange = async (req, res, next) => {
       pagination,
       data: expenses,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.downloadCsv = async (req, res, next) => {
+  const { startDate, endDate } = req.query;
+  try {
+    const expenses = await Expense.find({
+      user: req.user._id,
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    }).populate({
+      path: "category",
+      select: "categoryName description",
+    });
+
+    const expenseData = expenses.map((expense) => {
+      const { _id, amount, statement, category, subExpense, createdAt } =
+        expense;
+
+      return {
+        expenseId: _id.toString(),
+        amount,
+        title: statement,
+        category: category ? category.categoryName : "",
+        description: subExpense ? subExpense : "",
+        date: moment(createdAt).format("MMMM Do YYYY, h:mm:ss a"),
+      };
+    });
+
+    const csvFields = [
+      "expenseId",
+      "amount",
+      "title",
+      "category",
+      "description",
+      "date",
+    ];
+
+    console.log(expenseData);
+
+    const csvParser = new Parser({ csvFields });
+    const csvData = csvParser.parse(expenseData);
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment: filename=data${Date.now()}.csv`
+    );
+
+    res.status(200).end(csvData);
   } catch (error) {
     next(error);
   }

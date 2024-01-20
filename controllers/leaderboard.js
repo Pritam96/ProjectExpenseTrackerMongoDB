@@ -33,6 +33,20 @@ exports.getUsersWithTopExpenses = async (req, res, next) => {
           totalExpense: 1,
         },
       },
+      {
+        $setWindowFields: {
+          partitionBy: "_id",
+          sortBy: { totalExpense: -1 },
+          output: {
+            rank: {
+              $rank: {},
+            },
+          },
+        },
+      },
+      {
+        $limit: 5,
+      },
     ]);
 
     res

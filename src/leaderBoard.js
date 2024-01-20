@@ -45,7 +45,7 @@ function createRows(users) {
 
     const hCardTextRank = document.createElement("h5");
     hCardTextRank.classList.add("card-text");
-    hCardTextRank.innerText = users.indexOf(user) + 1;
+    hCardTextRank.innerText = user.rank;
     divColRank.appendChild(hCardTextRank);
 
     const divColUsername = document.createElement("div");

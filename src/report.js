@@ -12,6 +12,8 @@ const monthPickerSection = document.getElementById("month-picker-section");
 const weekPicker = document.getElementById("week-picker");
 const monthPicker = document.getElementById("month-picker");
 
+const buttonDownload = document.getElementById("download-button");
+
 viewTypeSelector.addEventListener("change", () => {
   if (viewTypeSelector.value === "weekly") {
     monthPickerSection.hidden = true;
@@ -78,6 +80,7 @@ async function getExpenseByDateRange(page, limit) {
     if (response.data.count > 0) {
       populateExpenses(response.data.data);
       loadPagination(response.data.pagination);
+      buttonDownload.hidden = false;
     } else {
       const expenseList = document.getElementById("expense-list");
       expenseList.innerText = "";
@@ -85,6 +88,7 @@ async function getExpenseByDateRange(page, limit) {
       pNotFound.innerText = "No expenses found!";
       pNotFound.classList.add("text-center");
       expenseList.appendChild(pNotFound);
+      buttonDownload.hidden = true;
     }
   } catch (error) {
     console.log(error);
@@ -220,3 +224,25 @@ function loadPagination(pagination) {
     }
   }
 }
+
+buttonDownload.addEventListener("click", async () => {
+  try {
+    let url = `http://localhost:5000/api/report/download?startDate=${startDate}&endDate=${endDate}`;
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const blob = new Blob([response.data], { type: "text/csv" });
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = `expenses_${Date.now()}.csv`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  } catch (error) {
+    console.log(error);
+  }
+});
