@@ -169,17 +169,20 @@ async function getExpenses(page, limit) {
     console.log("Get Expenses:", response.data.data);
 
     console.log("Pagination:", response.data.pagination);
-    loadPagination(response.data.pagination);
 
     console.log("EXPENSES FETCHED");
-    if (response.data.count !== 0) populateExpenses(response.data.data);
-    else {
+    if (response.data.count !== 0) {
+      populateExpenses(response.data.data);
+      document.getElementById("nav-pagination").hidden = false;
+      loadPagination(response.data.pagination);
+    } else {
       const expenseList = document.getElementById("expense-list");
       expenseList.innerText = "";
       const pNotFound = document.createElement("p");
       pNotFound.innerText = "No expenses found!";
       pNotFound.classList.add("text-center");
       expenseList.appendChild(pNotFound);
+      document.getElementById("nav-pagination").hidden = true;
     }
   } catch (error) {
     console.log(error);

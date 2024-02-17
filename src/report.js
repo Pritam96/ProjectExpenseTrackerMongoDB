@@ -78,10 +78,12 @@ async function getExpenseByDateRange(page, limit) {
     console.log("Pagination:", response.data.pagination);
 
     if (response.data.count > 0) {
+      document.getElementById("nav-pagination").hidden = false;
       populateExpenses(response.data.data);
       loadPagination(response.data.pagination);
       buttonDownload.hidden = false;
     } else {
+      document.getElementById("nav-pagination").hidden = true;
       const expenseList = document.getElementById("expense-list");
       expenseList.innerText = "";
       const pNotFound = document.createElement("p");
