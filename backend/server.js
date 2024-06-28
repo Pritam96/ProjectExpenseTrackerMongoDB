@@ -7,7 +7,7 @@ const ErrorResponse = require("./utils/errorResponse");
 
 const connectDB = require("./config/db");
 
-dotenv.config({ path: "./config/config.env" });
+dotenv.config({ path: "./backend/config/config.env" });
 
 connectDB();
 
