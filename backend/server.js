@@ -2,8 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
-const errorHandler = require("./middleware/error");
-const ErrorResponse = require("./utils/errorResponse");
+const { errorHandler, notFound } = require("./middleware/errorHandler");
 
 const connectDB = require("./config/db");
 
@@ -12,7 +11,6 @@ dotenv.config({ path: "./backend/config/config.env" });
 connectDB();
 
 const auth = require("./routes/auth");
-const user = require("./routes/user");
 const category = require("./routes/category");
 const expense = require("./routes/expense");
 const payment = require("./routes/payment");
@@ -25,25 +23,14 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/auth", auth);
-app.use("/api/user", user);
 app.use("/api/category", category);
 app.use("/api/expense", expense);
 app.use("/api/payment", payment);
 app.use("/api/leaderboard", leaderboard);
 app.use("/api/report", report);
 
+app.use(notFound);
 app.use(errorHandler);
-
-// Serve static files from the src directory
-app.use(express.static("./src"));
-
-// Catch-all route for handling wrong URLs
-app.all("*", (req, res, next) => {
-  return next(new ErrorResponse(`Invalid URL - ${req.originalUrl}`, 404));
-});
-
-// Serve index.html for the root URL
-app.get("/", (req, res, next) => res.sendFile("index.html"));
 
 const PORT = process.env.PORT || 5000;
 

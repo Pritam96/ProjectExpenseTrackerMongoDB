@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-// const ErrorResponse = require("../utils/errorResponse");
+const asyncHandler = require("express-async-handler");
 
-exports.protect = async (req, res, next) => {
+exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 
   if (
@@ -10,20 +10,29 @@ exports.protect = async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer ")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.headers["x-auth-token"]) {
+    token = req.headers["x-auth-token"];
   }
+
   if (!token) {
-    // return next(new ErrorResponse("Not authorize to access this route", 401));
-    return res
-      .status(401)
-      .json({ success: false, error: "Not authorize to access this route" });
+    res.status(401);
+    throw new Error("Not authorized to access this route");
   }
 
   try {
-    // token verify
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select("-passwordHash");
+    const user = await User.findById(decoded.id).select("-passwordHash");
+
+    if (!user) {
+      res.status(401);
+      throw new Error("User not found!");
+    }
+
+    req.user = user;
+
     next();
   } catch (error) {
-    res.status(401).json({ success: false, error: error.message });
+    res.status(401);
+    throw new Error("Token verification failed!");
   }
-};
+});
