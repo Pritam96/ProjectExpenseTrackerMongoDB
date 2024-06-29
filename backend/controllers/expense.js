@@ -3,31 +3,28 @@ const Expense = require("../models/Expense");
 const Category = require("../models/Category");
 
 exports.postExpense = asyncHandler(async (req, res, next) => {
-  const { statement, category, newCategoryName, amount, subExpense } = req.body;
+  const { title, amount, category, description } = req.body;
 
-  // Required Fields
   const enteredData = {
     user: req.user._id,
-    statement,
+    title,
     amount,
+    category,
+    description: description || undefined,
   };
 
-  if (newCategoryName) {
-    // Create category and get id
-    const response = await Category.create({
-      categoryName: newCategoryName,
-      user: req.user._id,
-    });
-    enteredData.category = response._id;
-  } else enteredData.category = category;
-
-  // Optional Field
-  if (subExpense) enteredData.subExpense = subExpense;
-
   const expense = await Expense.create(enteredData);
+  const categoryDocument = await Category.findById(expense.category);
 
   res.status(201).json({
-    expense,
+    _id: expense._id,
+    title: expense.title,
+    categoryId: expense.category,
+    category: categoryDocument.title,
+    amount: expense.amount,
+    description: expense.description,
+    createdAt: expense.createdAt,
+    updatedAt: expense.updatedAt,
   });
 });
 
@@ -40,12 +37,24 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   const total = await Expense.countDocuments({ user: req.user._id });
 
   const expenses = await Expense.find({ user: req.user._id })
+    .select("title amount category description createdAt updatedAt")
     .skip(startIndex)
     .limit(limit)
     .populate({
       path: "category",
-      select: "categoryName description",
+      select: "title",
     });
+
+  const transformedExpenses = expenses.map((expense) => ({
+    _id: expense._id,
+    title: expense.title,
+    categoryId: expense.category._id,
+    category: expense.category.title,
+    amount: expense.amount,
+    description: expense.description,
+    createdAt: expense.createdAt,
+    updatedAt: expense.updatedAt,
+  }));
 
   // Pagination result
   const pagination = {};
@@ -68,53 +77,67 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
-    count: expenses.length,
     pagination,
-    expenses,
+    count: transformedExpenses.length,
+    expenses: transformedExpenses,
   });
 });
 
 exports.getExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
-  const expense = await Expense.findById(expenseId);
+  const expense = await Expense.findById(expenseId).populate({
+    path: "category",
+    select: "title",
+  });
+
   if (!expense) {
     res.status(404);
-    throw new Error("Resource not found");
+    throw new Error("Expense not found");
   }
-  res.status(200).json({ expense });
+
+  res.status(200).json({
+    _id: expense._id,
+    title: expense.title,
+    categoryId: expense.category._id,
+    category: expense.category.title,
+    amount: expense.amount,
+    description: expense.description,
+    createdAt: expense.createdAt,
+    updatedAt: expense.updatedAt,
+  });
 });
 
-exports.postEditExpense = asyncHandler(async (req, res, next) => {
+exports.putEditExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
+  const { title, category, amount, description } = req.body;
 
-  const { statement, category, newCategoryName, amount, subExpense } = req.body;
-
-  // Required Fields
   const enteredData = {
-    statement,
+    title,
     amount,
+    category,
+    description: description || undefined,
   };
-
-  if (newCategoryName) {
-    // Create category and get id
-    const response = await Category.create({
-      categoryName: newCategoryName,
-      user: req.user._id,
-    });
-    enteredData.category = response._id;
-  } else enteredData.category = category;
-
-  // Optional Field
-  if (subExpense) enteredData.subExpense = subExpense;
 
   const expense = await Expense.findByIdAndUpdate(expenseId, enteredData, {
     new: true,
   });
 
+  if (!expense) {
+    res.status(404);
+    throw new Error("Expense not found");
+  }
+
+  const categoryDocument = await Category.findById(category);
+
   res.status(201).json({
-    expense,
-    message: "Resource updated successfully",
+    _id: expense._id,
+    title: expense.title,
+    categoryId: expense.category,
+    category: categoryDocument.title,
+    amount: expense.amount,
+    description: expense.description,
+    createdAt: expense.createdAt,
+    updatedAt: expense.updatedAt,
   });
 });
 
@@ -123,7 +146,7 @@ exports.deleteExpense = asyncHandler(async (req, res, next) => {
   const expense = await Expense.findByIdAndDelete(expenseId);
   if (!expense) {
     res.status(404);
-    throw new Error("Resource not found");
+    throw new Error("Expense not found");
   }
-  res.status(200).json({ message: "Resource deleted successfully" });
+  res.status(200).json({ message: "Expense deleted successfully" });
 });

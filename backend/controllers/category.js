@@ -1,33 +1,20 @@
+const asyncHandler = require("express-async-handler");
 const Category = require("../models/Category");
 
-exports.addCategory = async (req, res, next) => {
-  try {
-    const { categoryName, description } = req.body;
-    let data = { categoryName, description };
-    if (!req.user.isAdmin) {
-      data.user = req.user._id;
-    }
-    const category = await Category.create(data);
-    res.status(200).json({ success: true, data: category });
-  } catch (error) {
-    next(error);
-  }
-};
+exports.addCategory = asyncHandler(async (req, res, next) => {
+  const { title, description } = req.body;
+  let data = { title, description };
+  await Category.create(data);
+  res.status(200).json({ message: "Category added successfully" });
+});
 
-exports.getCategories = async (req, res, next) => {
-  try {
-    const categories = await Category.find({
-      $or: [{ user: req.user._id }, { user: null }],
-    }).sort({ updatedAt: 1 });
+exports.getCategories = asyncHandler(async (req, res, next) => {
+  const categories = await Category.find()
+    .select("_id title description createdAt")
+    .sort({ createdAt: 1 });
 
-    res.status(200).json({
-      success: true,
-      data: {
-        count: categories.length,
-        categories: categories,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  res.status(200).json({
+    count: categories.length,
+    categories: categories,
+  });
+});

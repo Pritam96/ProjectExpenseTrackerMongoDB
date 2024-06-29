@@ -3,26 +3,26 @@ const { Schema } = mongoose;
 
 const ExpenseSchema = new Schema(
   {
-    statement: {
+    title: {
       type: String,
-      required: [true, "Statement is required"],
+      required: [true, "Title is required"],
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: [true, "Category name is required"],
+      required: [true, "Category is required"],
     },
     amount: {
       type: Number,
       required: [true, "Amount is required"],
     },
+    description: {
+      type: String,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-    },
-    subExpense: {
-      type: String,
     },
   },
   { timestamps: true }
