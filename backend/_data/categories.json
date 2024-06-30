@@ -1,0 +1,86 @@
+[
+  {
+    "title": "Housing",
+    "description": "Rent or mortgage payments, property taxes, and home-related expenses."
+  },
+  {
+    "title": "Food",
+    "description": "Expenses related to groceries, dining out, and food supplies."
+  },
+  {
+    "title": "Utilities",
+    "description": "Monthly bills for electricity, water, gas, and other essential services."
+  },
+  {
+    "title": "Transportation",
+    "description": "Costs associated with commuting, public transportation, or vehicle maintenance."
+  },
+  {
+    "title": "Healthcare",
+    "description": "Medical bills, insurance premiums, and expenses related to health and wellness."
+  },
+  {
+    "title": "Bills & Recharge",
+    "description": "Payments for phone bills, internet recharge, and other recurring bills."
+  },
+  {
+    "title": "Insurance",
+    "description": "Insurance premiums for health, life, auto, and other insurance policies."
+  },
+  {
+    "title": "Savings",
+    "description": "Allocated funds for savings and investments."
+  },
+  {
+    "title": "Clothing",
+    "description": "Fashionable apparel for men, women, and children."
+  },
+  {
+    "title": "Entertainment",
+    "description": "Expenditure on movies, concerts, hobbies, and leisure activities."
+  },
+  {
+    "title": "Technology",
+    "description": "Electronics, gadgets, and expenses related to technology."
+  },
+  {
+    "title": "Travel",
+    "description": "Costs associated with vacations, flights, hotels, and travel activities."
+  },
+  {
+    "title": "Education",
+    "description": "Tuition fees, books, and other educational expenses."
+  },
+  {
+    "title": "Books",
+    "description": "A wide range of books across different genres and authors."
+  },
+  {
+    "title": "Sports and Outdoors",
+    "description": "Equipment and gear for various sports and outdoor activities."
+  },
+  {
+    "title": "Furniture",
+    "description": "Various types of furniture for home and office use."
+  },
+  {
+    "title": "Home Improvement",
+    "description": "Expenses related to home renovations and improvements."
+  },
+  {
+    "title": "Gifts",
+    "description": "Spending on gifts for birthdays, holidays, and special occasions."
+  },
+  {
+    "title": "Subscriptions",
+    "description": "Monthly subscription services for streaming, magazines, and other subscriptions."
+  },
+  {
+    "title": "Pet Care",
+    "description": "Expenses for pet food, veterinary care, and pet-related supplies."
+  },
+  {
+    "title": "Other Expense",
+    "description": "Miscellaneous expenditures not covered by specific categories."
+  }
+]
