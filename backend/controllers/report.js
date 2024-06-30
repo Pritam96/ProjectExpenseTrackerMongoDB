@@ -6,6 +6,11 @@ const Expense = require("../models/Expense");
 exports.getExpensesByRange = asyncHandler(async (req, res, next) => {
   const { startDate, endDate } = req.query;
 
+  if (!startDate || !endDate) {
+    res.status(400);
+    throw new Error("Start date and end date are required.");
+  }
+
   // Pagination
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 5;
@@ -30,8 +35,18 @@ exports.getExpensesByRange = asyncHandler(async (req, res, next) => {
     .limit(limit)
     .populate({
       path: "category",
-      select: "categoryName description",
+      select: "title",
     });
+
+  const transformedExpenses = expenses.map((expense) => ({
+    _id: expense._id,
+    title: expense.title,
+    category: expense.category.title,
+    amount: expense.amount,
+    description: expense.description,
+    createdAt: expense.createdAt,
+    updatedAt: expense.updatedAt,
+  }));
 
   // Pagination result
   const pagination = {};
@@ -54,14 +69,30 @@ exports.getExpensesByRange = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    count: expenses.length,
     pagination,
-    expenses,
+    count: transformedExpenses.length,
+    expenses: transformedExpenses,
   });
 });
 
 exports.downloadCsv = asyncHandler(async (req, res, next) => {
   const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    res.status(400);
+    throw new Error("Start date and end date are required.");
+  }
+
+  if (
+    !moment(startDate, moment.ISO_8601, true).isValid() ||
+    !moment(endDate, moment.ISO_8601, true).isValid()
+  ) {
+    res.status(400);
+    throw new Error(
+      "Invalid date format. Please provide valid ISO 8601 dates."
+    );
+  }
+
   const expenses = await Expense.find({
     user: req.user._id,
     createdAt: {
@@ -70,38 +101,36 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
     },
   }).populate({
     path: "category",
-    select: "categoryName description",
+    select: "title",
   });
 
-  const expenseData = expenses.map((expense) => {
-    const { _id, amount, statement, category, subExpense, createdAt } = expense;
-
-    return {
-      expenseId: _id.toString(),
-      amount,
-      title: statement,
-      category: category ? category.categoryName : "",
-      description: subExpense ? subExpense : "",
-      date: moment(createdAt).format("MMMM Do YYYY, h:mm:ss a"),
-    };
-  });
+  const transformedExpenses = expenses.map((expense) => ({
+    id: expense._id.toString(),
+    title: expense.title,
+    category: expense.category.title,
+    amount: expense.amount,
+    description: expense.description ? expense.description : "",
+    created: moment(expense.createdAt).format("MMMM Do YYYY, h:mm:ss a"),
+    updated: moment(expense.updatedAt).format("MMMM Do YYYY, h:mm:ss a"),
+  }));
 
   const csvFields = [
-    "expenseId",
-    "amount",
-    "title",
-    "category",
-    "description",
-    "date",
+    { label: "ID", value: "id" },
+    { label: "Title", value: "title" },
+    { label: "Category", value: "category" },
+    { label: "Amount", value: "amount" },
+    { label: "Description", value: "description" },
+    { label: "Created", value: "created" },
+    { label: "Updated", value: "updated" },
   ];
 
   const csvParser = new Parser({ csvFields });
-  const csvData = csvParser.parse(expenseData);
+  const csvData = csvParser.parse(transformedExpenses);
 
   res.setHeader("Content-Type", "text/csv");
   res.setHeader(
     "Content-Disposition",
-    `attachment: filename=data${Date.now()}.csv`
+    `attachment: filename=expenses_${Date.now()}.csv`
   );
 
   res.status(200).end(csvData);
