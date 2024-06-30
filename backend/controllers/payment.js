@@ -1,43 +1,63 @@
 const asyncHandler = require("express-async-handler");
 const crypto = require("crypto");
-const Razorpay = require("razorpay");
+const razorpay = require("razorpay");
+const shortid = require("shortid");
 const Payment = require("../models/Payment");
 const User = require("../models/User");
 
-const razorpay = new Razorpay({
+const instance = new razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-exports.createOrder = asyncHandler(async (req, res, next) => {
-  const amount = 1000; // Amount in paise
+// Create order instance
+exports.postOrderCreate = asyncHandler(async (req, res, next) => {
+  const payment_capture = 1;
+  const amount = 50000; // amount in the smallest currency unit
   const currency = "INR";
+  const receipt = `receipt_${shortid.generate()}`;
 
   const options = {
     amount,
     currency,
-    receipt: "order_receipt#1",
-    payment_capture: 1,
+    receipt,
+    payment_capture,
   };
 
-  const order = await razorpay.orders.create(options);
+  // Initiate order creation
+  const order = await instance.orders.create(options);
 
-  const payment = new Payment({
-    orderId: order.id,
+  // Saving payment information
+  await Payment.create({
     user: req.user._id,
+    order_id: order.id,
+    ...order,
   });
 
-  await payment.save();
-
   res.status(200).json({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    ...order,
+    username: req.user.username,
+    email: req.user.email,
+    phone: req.user.phone,
+    order_id: order.id,
+    amount: order.amount,
   });
 });
 
-exports.capturePayment = asyncHandler(async (req, res, next) => {
+// Get payment id
+exports.getKey = asyncHandler(async (req, res, next) => {
+  res.status(200).json({
+    key: process.env.RAZORPAY_KEY_ID,
+  });
+});
+
+exports.postPaymentVerify = asyncHandler(async (req, res, next) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
     req.body;
+
+  if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    res.status(400);
+    throw new Error("Invalid Payment Details");
+  }
 
   // Verify the payment signature
   const shasum = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
@@ -49,17 +69,17 @@ exports.capturePayment = asyncHandler(async (req, res, next) => {
     throw new Error("Invalid Signature");
   }
 
-  const payment = await Payment.findOne({ orderId: razorpay_order_id });
-  payment.paymentId = razorpay_payment_id;
+  const payment = await Payment.findOne({ order_id: razorpay_order_id });
+
+  payment.payment_id = razorpay_payment_id;
+  payment.payment_signature = razorpay_signature;
+  payment.amount_due = 0;
+  payment.amount_paid = payment.amount;
   payment.status = "complete";
-  const updatedPayment = await payment.save();
+  await payment.save();
 
-  req.user = await User.findByIdAndUpdate(
-    req.user._id,
-    { isPremium: true },
-    { new: true }
-  );
+  // Update user
+  await User.findByIdAndUpdate(payment.user, { isPremium: true });
 
-  // Send a success response to the client
-  res.status(200).json({ data: updatedPayment });
+  res.status(200).json({ message: "Payment successful" });
 });
