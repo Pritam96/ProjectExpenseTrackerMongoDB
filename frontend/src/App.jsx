@@ -1,7 +1,14 @@
+import { Outlet } from "react-router-dom";
+import Header from "./components/Header";
+import { Container } from "react-bootstrap";
+
 const App = () => {
   return (
     <>
-      <h1 className="text-3xl font-bold underline">Hello World</h1>
+      <Header />
+      <Container className="my-2">
+        <Outlet />
+      </Container>
     </>
   );
 };
