@@ -46,7 +46,7 @@ exports.postOrderCreate = asyncHandler(async (req, res, next) => {
 // Get payment id
 exports.getKey = asyncHandler(async (req, res, next) => {
   res.status(200).json({
-    key: process.env.RAZORPAY_KEY_ID,
+    razorpay_key_id: process.env.RAZORPAY_KEY_ID,
   });
 });
 
@@ -75,11 +75,13 @@ exports.postPaymentVerify = asyncHandler(async (req, res, next) => {
   payment.payment_signature = razorpay_signature;
   payment.amount_due = 0;
   payment.amount_paid = payment.amount;
-  payment.status = "complete";
+  payment.status = "paid";
   await payment.save();
 
   // Update user
   await User.findByIdAndUpdate(payment.user, { isPremium: true });
 
-  res.status(200).json({ message: "Payment successful" });
+  res
+    .status(200)
+    .json({ message: "Payment successful", reference_no: payment.order_id });
 });

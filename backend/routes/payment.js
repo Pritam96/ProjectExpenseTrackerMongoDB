@@ -9,6 +9,6 @@ const router = Router();
 
 router.post("/create", protect, postOrderCreate);
 router.get("/key", protect, getKey);
-router.post("/verify", postPaymentVerify);
+router.post("/verify", protect, postPaymentVerify);
 
 module.exports = router;
