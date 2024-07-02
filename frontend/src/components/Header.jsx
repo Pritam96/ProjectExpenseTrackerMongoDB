@@ -8,9 +8,23 @@ import {
   NavLink,
 } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-import { FaSignInAlt, FaUserPlus, FaWallet } from "react-icons/fa";
+import {
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaUserPlus,
+  FaWallet,
+} from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../features/auth/authSlice";
 
 const Header = () => {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  const logoutHandler = () => {
+    dispatch(logout());
+  };
+
   return (
     <header>
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
@@ -24,17 +38,29 @@ const Header = () => {
           <NavbarToggle aria-controls="basic-navbar-nav" />
           <NavbarCollapse>
             <Nav className="ms-auto">
-              <LinkContainer to="/login">
-                <NavLink className="d-flex align-items-center">
-                  <FaSignInAlt className="me-2" size={20} />
-                  Login
+              {user ? (
+                <NavLink
+                  className="d-flex align-items-center"
+                  onClick={logoutHandler}
+                >
+                  <FaSignOutAlt className="me-2" size={20} />
+                  Logout
                 </NavLink>
-              </LinkContainer>
-              <LinkContainer to="/register">
-                <NavLink className="d-flex align-items-center">
-                  <FaUserPlus className="me-2" size={20} /> Register
-                </NavLink>
-              </LinkContainer>
+              ) : (
+                <>
+                  <LinkContainer to="/login">
+                    <NavLink className="d-flex align-items-center">
+                      <FaSignInAlt className="me-2" size={20} />
+                      Login
+                    </NavLink>
+                  </LinkContainer>
+                  <LinkContainer to="/register">
+                    <NavLink className="d-flex align-items-center">
+                      <FaUserPlus className="me-2" size={20} /> Register
+                    </NavLink>
+                  </LinkContainer>
+                </>
+              )}
             </Nav>
           </NavbarCollapse>
         </Container>

@@ -1,5 +1,6 @@
 NODE_ENV=development
 PORT=
+CLIENT_URL=localhost:3000
 MONGO_URI=
 
 JWT_SECRET=

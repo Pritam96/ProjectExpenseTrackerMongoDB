@@ -1,28 +1,24 @@
 import {
   Button,
-  Col,
   Container,
   Form,
   FormControl,
   FormGroup,
   FormLabel,
-  Row,
   Spinner,
 } from "react-bootstrap";
-import { toast } from "react-toastify";
-import { FaSignInAlt } from "react-icons/fa";
 import FormContainer from "../components/FormContainer";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login, reset } from "../features/auth/authSlice";
+import { toast } from "react-toastify";
+import { forgotPassword, reset } from "../features/auth/authSlice";
 
-const Login = () => {
+const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { user, isError, isSuccess, isLoading, message } = useSelector(
     (state) => state.auth
@@ -32,8 +28,12 @@ const Login = () => {
     if (isError) {
       toast.error(message);
     }
-    if (isSuccess || user) {
+    if (user) {
       navigate("/");
+    }
+    if (isSuccess) {
+      toast.success("Email sent successfully!");
+      navigate("/login");
     }
     return () => {
       if (isSuccess || isError) {
@@ -44,7 +44,7 @@ const Login = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    dispatch(forgotPassword(email));
   };
 
   if (isLoading) {
@@ -57,10 +57,7 @@ const Login = () => {
 
   return (
     <FormContainer>
-      <h3 className="d-flex align-items-center">
-        <FaSignInAlt className="me-2" />
-        Log In
-      </h3>
+      <h3 className="d-flex align-items-center">Forgot Password</h3>
       <Form onSubmit={submitHandler}>
         <FormGroup className="my-2" controlId="email">
           <FormLabel>Email Address</FormLabel>
@@ -72,34 +69,12 @@ const Login = () => {
           />
         </FormGroup>
 
-        <FormGroup className="my-2" controlId="password">
-          <FormLabel>Password</FormLabel>
-          <FormControl
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </FormGroup>
-
-        <Button
-          type="submit"
-          variant="primary"
-          className={`mt-3 ${isLoading ? "disabled" : ""}`}
-        >
-          Log In
+        <Button type="submit" variant="primary" className="mt-3">
+          Submit
         </Button>
       </Form>
-      <Row className="py-3">
-        <Col md={12}>
-          New Customer? <Link to={`/register`}>Register</Link>
-        </Col>
-        <Col md={12} className="mt-3">
-          Forgot Password? <Link to={`/forgot`}>Reset Password</Link>
-        </Col>
-      </Row>
     </FormContainer>
   );
 };
 
-export default Login;
+export default ForgotPassword;

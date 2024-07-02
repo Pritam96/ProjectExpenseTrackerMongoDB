@@ -1,28 +1,66 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormContainer from "../components/FormContainer";
 import { FaUserPlus } from "react-icons/fa";
 import {
   Button,
   Col,
+  Container,
   Form,
   FormControl,
   FormGroup,
   FormLabel,
   Row,
+  Spinner,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { register, reset } from "../features/auth/authSlice";
+import { toast } from "react-toastify";
 
 const Register = () => {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { user, isError, isSuccess, isLoading, message } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+    }
+    if (isSuccess || user) {
+      navigate("/");
+    }
+    return () => {
+      if (isSuccess || isError) {
+        dispatch(reset());
+      }
+    };
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
+
   const submitHandler = (e) => {
     e.preventDefault();
-    console.log(email, password);
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    dispatch(register({ username, email, phoneNumber, password }));
   };
+
+  if (isLoading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center mt-5">
+        <Spinner animation="border" />
+      </Container>
+    );
+  }
 
   return (
     <FormContainer>
@@ -32,12 +70,12 @@ const Register = () => {
       </h3>
       <Form onSubmit={submitHandler}>
         <FormGroup className="my-2" controlId="name">
-          <FormLabel>Full Name</FormLabel>
+          <FormLabel>Username</FormLabel>
           <FormControl
             type="text"
-            placeholder="Enter name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </FormGroup>
 
@@ -46,8 +84,8 @@ const Register = () => {
           <FormControl
             type="text"
             placeholder="Enter phone no"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
           />
         </FormGroup>
 
