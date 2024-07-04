@@ -39,13 +39,20 @@ const Header = () => {
           <NavbarCollapse>
             <Nav className="ms-auto">
               {user ? (
-                <NavLink
-                  className="d-flex align-items-center"
-                  onClick={logoutHandler}
-                >
-                  <FaSignOutAlt className="me-2" size={20} />
-                  Logout
-                </NavLink>
+                <>
+                  <LinkContainer to="/expense">
+                    <NavLink className="d-flex align-items-center">
+                      Expenses
+                    </NavLink>
+                  </LinkContainer>
+                  <NavLink
+                    className="d-flex align-items-center"
+                    onClick={logoutHandler}
+                  >
+                    <FaSignOutAlt className="me-2" size={20} />
+                    Logout
+                  </NavLink>
+                </>
               ) : (
                 <>
                   <LinkContainer to="/login">

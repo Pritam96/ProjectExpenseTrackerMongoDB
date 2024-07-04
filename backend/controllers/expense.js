@@ -31,7 +31,7 @@ exports.postExpense = asyncHandler(async (req, res, next) => {
 exports.getExpenses = asyncHandler(async (req, res, next) => {
   // Pagination
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 5;
+  const limit = parseInt(req.query.limit, 10) || 4;
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   const total = await Expense.countDocuments({ user: req.user._id });
@@ -85,10 +85,14 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
 
 exports.getExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
-  const expense = await Expense.findById(expenseId).populate({
-    path: "category",
-    select: "title",
-  });
+  const expense = await Expense.findById(expenseId)
+    .populate({
+      path: "category",
+      select: "title",
+    })
+    .sort({
+      createdAt: -1,
+    });
 
   if (!expense) {
     res.status(404);

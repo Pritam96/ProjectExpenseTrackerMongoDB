@@ -4,6 +4,6 @@ const { protect } = require("../middleware/protect");
 const router = Router();
 
 router.post("/add", addCategory);
-router.get("/", protect, getCategories);
+router.get("/", getCategories);
 
 module.exports = router;

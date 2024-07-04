@@ -17,6 +17,8 @@ import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
+import PrivateRoute from "./components/PrivateRoute.jsx";
+import Expenses from "./pages/Expenses.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -26,6 +28,10 @@ const router = createBrowserRouter(
       <Route path="/register" element={<Register />} />
       <Route path="/forgot" element={<ForgotPassword />} />
       <Route path="/reset/:token" element={<ResetPassword />} />
+
+      <Route path="" element={<PrivateRoute />}>
+        <Route path="/expense" element={<Expenses />}></Route>
+      </Route>
     </Route>
   )
 );
