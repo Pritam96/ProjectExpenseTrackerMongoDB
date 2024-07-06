@@ -38,10 +38,10 @@ export const createExpense = createAsyncThunk(
 
 export const getExpenses = createAsyncThunk(
   "expense/getAll",
-  async (type, thunkAPI) => {
+  async (parameters, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await expenseService.getExpenses(type, token);
+      return await expenseService.getExpenses(parameters, token);
     } catch (error) {
       const message =
         (error.response &&

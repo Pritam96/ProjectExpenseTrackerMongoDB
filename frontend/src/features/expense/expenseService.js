@@ -12,13 +12,24 @@ const create = async (expenseData, token) => {
   return response.data;
 };
 
-const getExpenses = async (type, token) => {
+const getExpenses = async ({ type, pagination } = {}, token) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axios.get(`${API_URL}/?type=${type}`, config);
+
+  const params = new URLSearchParams();
+
+  if (type) params.append("type", type);
+  if (pagination?.page) params.append("page", pagination.page);
+  if (pagination?.limit) params.append("limit", pagination.limit);
+
+  const URL = `${API_URL}/?${params.toString()}`;
+
+  console.log(URL);
+
+  const response = await axios.get(URL, config);
   return response.data;
 };
 

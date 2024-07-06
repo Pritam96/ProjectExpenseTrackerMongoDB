@@ -4,17 +4,18 @@ import { getExpenses } from "../features/expense/expenseSlice";
 import ExpenseItem from "./ExpenseItem";
 import { Col, Container, FormSelect, Row, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
+import PaginationComponent from "./PaginationComponent";
 
 const ExpenseList = () => {
   const [type, setType] = useState("daily");
 
   const dispatch = useDispatch();
-  const { expenses, isError, isLoading, message } = useSelector(
+  const { expenses, isError, isLoading, message, pagination } = useSelector(
     (state) => state.expenses
   );
 
   useEffect(() => {
-    dispatch(getExpenses(type));
+    dispatch(getExpenses({ type }));
     if (isError) {
       toast.error(message);
     }
@@ -22,12 +23,24 @@ const ExpenseList = () => {
 
   const { totalExpenses } = useSelector((state) => state.expenses);
 
+  const handlePageChange = (page) => {
+    dispatch(
+      getExpenses({
+        type,
+        pagination: {
+          page: page,
+          limit: pagination.limit,
+        },
+      })
+    );
+  };
+
   return (
     <Container fluid>
       <Row className="flex-d">
         <Col className="d-flex">
-          <div className="mt-3 text-underline">
-            Total Expenses ({type}) : <b>₹{totalExpenses[type]}</b>
+          <div className="mt-3">
+            Total ({type}) : <b>₹{totalExpenses[type]}</b>
           </div>
         </Col>
         <Col className="d-flex justify-content-end">
@@ -59,6 +72,12 @@ const ExpenseList = () => {
             <Spinner animation="border" />
           </Container>
         )}
+      </Row>
+      <Row>
+        <PaginationComponent
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
       </Row>
     </Container>
   );
