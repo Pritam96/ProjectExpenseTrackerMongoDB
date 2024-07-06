@@ -12,30 +12,13 @@ const create = async (expenseData, token) => {
   return response.data;
 };
 
-const getExpenses = async (pagination, token) => {
+const getExpenses = async (type, token) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-  if (pagination) {
-    const response = await axios.get(
-      `${API_URL}/?page=${pagination.page}&limit=${pagination.limit}`,
-      config
-    );
-    return response.data;
-  }
-  const response = await axios.get(`${API_URL}/`, config);
-  return response.data;
-};
-
-const getExpense = async (expenseId, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axios.get(`${API_URL}/${expenseId}`, config);
+  const response = await axios.get(`${API_URL}/?type=${type}`, config);
   return response.data;
 };
 
@@ -63,11 +46,28 @@ const deleteExpense = async (expenseId, token) => {
   return response.data;
 };
 
+const getTotalExpenses = async (start, end, token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  if (start && end) {
+    const response = await axios.get(
+      `${API_URL}/total?start=${start}&end=${end}`,
+      config
+    );
+    return response.data;
+  }
+  const response = await axios.get(`${API_URL}/total`, config);
+  return response.data;
+};
+
 const authService = {
   create,
-  getExpense,
   getExpenses,
   editExpense,
   deleteExpense,
+  getTotalExpenses,
 };
 export default authService;

@@ -9,6 +9,7 @@ import {
   Col,
   Row,
 } from "react-bootstrap";
+import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
@@ -36,7 +37,6 @@ const ExpenseItem = ({ expense }) => {
 
   const deleteHandler = () => {
     dispatch(deleteExpense(expense._id)).then(() => {
-      dispatch(getExpenses());
       toast.success("Expense Deleted");
     });
   };
@@ -65,7 +65,9 @@ const ExpenseItem = ({ expense }) => {
               <Badge bg="success" className="mb-2">
                 {expense.category}
               </Badge>
-              <Badge bg="dark">{expense.createdAt}</Badge>
+              <Badge bg="dark">
+                {moment(expense.createdAt).format("MMMM Do YYYY, h:mm:ss a")}
+              </Badge>
             </Row>
           </Col>
           <Col xs={3}>

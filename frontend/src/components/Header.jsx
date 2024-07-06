@@ -40,6 +40,11 @@ const Header = () => {
             <Nav className="ms-auto">
               {user ? (
                 <>
+                  <LinkContainer to="/reports">
+                    <NavLink className="d-flex align-items-center">
+                      Reports
+                    </NavLink>
+                  </LinkContainer>
                   <LinkContainer to="/expense">
                     <NavLink className="d-flex align-items-center">
                       Expenses

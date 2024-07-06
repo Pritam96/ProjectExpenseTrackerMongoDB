@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Button,
+  Container,
   FormControl,
   FormGroup,
   FormLabel,
@@ -12,6 +13,7 @@ import { getCategories } from "../features/category/categorySlice";
 import {
   createExpense,
   editExpense,
+  getTotalExpenses,
   reset,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
@@ -27,7 +29,7 @@ const ExpenseForm = () => {
 
   const { categories } = useSelector((state) => state.categories);
 
-  const { isEditMode, expense, isError, message } = useSelector(
+  const { isEditMode, editExpenseData, isError, message } = useSelector(
     (state) => state.expenses
   );
 
@@ -36,14 +38,14 @@ const ExpenseForm = () => {
       toast.error(message);
     }
     if (isEditMode) {
-      setExpenseId(expense._id);
-      setTitle(expense.title);
-      setAmount(expense.amount);
-      setDescription(expense.description);
-      setCategory(expense.categoryId);
+      setExpenseId(editExpenseData._id);
+      setTitle(editExpenseData.title);
+      setAmount(editExpenseData.amount);
+      setDescription(editExpenseData.description);
+      setCategory(editExpenseData.categoryId);
     }
     dispatch(getCategories());
-  }, [dispatch, isEditMode, expense, isError, message]);
+  }, [dispatch, isEditMode, editExpenseData, isError, message]);
 
   const formHandler = (e) => {
     e.preventDefault();
@@ -60,12 +62,15 @@ const ExpenseForm = () => {
         })
       ).then(() => {
         toast.success("Expense Updated");
-        dispatch(reset());
+        if (amount !== editExpenseData.amount) {
+          dispatch(getTotalExpenses({}));
+        }
         setExpenseId("");
         setTitle("");
         setAmount("");
         setDescription("");
         setCategory("");
+        dispatch(reset());
       });
     } else {
       const expenseData = {
@@ -75,7 +80,7 @@ const ExpenseForm = () => {
         description,
       };
       dispatch(createExpense(expenseData)).then(() => {
-        toast.success("Expense Created");
+        toast.success("Expense Added");
         dispatch(reset());
         setExpenseId("");
         setTitle("");
@@ -87,59 +92,61 @@ const ExpenseForm = () => {
   };
 
   return (
-    <Form onSubmit={formHandler}>
-      <FormGroup className="my-2" controlId="title">
-        <FormLabel>Title</FormLabel>
-        <FormControl
-          type="text"
-          placeholder="Enter title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </FormGroup>
+    <Container fluid>
+      <Form onSubmit={formHandler}>
+        <FormGroup className="my-3" controlId="title">
+          <FormLabel className="h5">Title</FormLabel>
+          <FormControl
+            type="text"
+            placeholder="Enter title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </FormGroup>
 
-      <FormGroup className="my-2" controlId="amount">
-        <FormLabel>Amount</FormLabel>
-        <FormControl
-          type="number"
-          placeholder="Enter amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
-      </FormGroup>
+        <FormGroup className="my-3" controlId="amount">
+          <FormLabel className="h5">Amount</FormLabel>
+          <FormControl
+            type="number"
+            placeholder="Enter amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </FormGroup>
 
-      <FormGroup className="my-2" controlId="category">
-        <FormLabel>Category</FormLabel>
-        <FormSelect
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="" disabled>
-            Select a category
-          </option>
-          {categories &&
-            categories.map((categoryItem) => (
-              <option value={categoryItem._id} key={categoryItem._id}>
-                {categoryItem.title}
-              </option>
-            ))}
-        </FormSelect>
-      </FormGroup>
+        <FormGroup className="my-3" controlId="category">
+          <FormLabel className="h5">Category</FormLabel>
+          <FormSelect
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="" disabled>
+              Select a category
+            </option>
+            {categories &&
+              categories.map((categoryItem) => (
+                <option value={categoryItem._id} key={categoryItem._id}>
+                  {categoryItem.title}
+                </option>
+              ))}
+          </FormSelect>
+        </FormGroup>
 
-      <FormGroup className="my-2" controlId="description">
-        <FormLabel>Description</FormLabel>
-        <FormControl
-          type="text"
-          placeholder="Enter description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </FormGroup>
+        <FormGroup className="my-3" controlId="description">
+          <FormLabel className="h5">Description</FormLabel>
+          <FormControl
+            type="text"
+            placeholder="Enter description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </FormGroup>
 
-      <Button type="submit" variant="primary" className="mt-3 w-100">
-        Save
-      </Button>
-    </Form>
+        <Button type="submit" variant="primary" className="mt-3 w-100">
+          Save
+        </Button>
+      </Form>
+    </Container>
   );
 };
 

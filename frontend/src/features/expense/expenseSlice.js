@@ -3,11 +3,18 @@ import expenseService from "./expenseService";
 
 const initialState = {
   expenses: [],
+  pagination: {},
+  totalExpenses: {
+    daily: 0,
+    weekly: 0,
+    monthly: 0,
+    yearly: 0,
+  },
   isError: false,
   isSuccess: false,
   isLoading: false,
   isEditMode: false,
-  expense: {},
+  editExpenseData: {},
   message: "",
 };
 
@@ -31,10 +38,10 @@ export const createExpense = createAsyncThunk(
 
 export const getExpenses = createAsyncThunk(
   "expense/getAll",
-  async (paginationData, thunkAPI) => {
+  async (type, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await expenseService.getExpenses(paginationData, token);
+      return await expenseService.getExpenses(type, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -47,12 +54,16 @@ export const getExpenses = createAsyncThunk(
   }
 );
 
-export const getExpense = createAsyncThunk(
-  "expense/getSingle",
-  async (expenseId, thunkAPI) => {
+export const getTotalExpenses = createAsyncThunk(
+  "expense/total",
+  async (dateRange, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await expenseService.getExpense(expenseId, token);
+      return await expenseService.getTotalExpenses(
+        dateRange.start || null,
+        dateRange.end || null,
+        token
+      );
     } catch (error) {
       const message =
         (error.response &&
@@ -117,7 +128,7 @@ const expenseSlice = createSlice({
       state.isSuccess = false;
       state.isLoading = false;
       state.isEditMode = false;
-      state.expense = {};
+      state.editExpenseData = {};
       state.message = "";
     },
   },
@@ -144,22 +155,9 @@ const expenseSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.expenses = action.payload.expenses;
+        state.pagination = action.payload.pagination;
       })
       .addCase(getExpenses.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
-      })
-
-      .addCase(getExpense.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getExpense.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.expenses.push(action.payload);
-      })
-      .addCase(getExpense.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
@@ -196,9 +194,24 @@ const expenseSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
+
+      .addCase(getTotalExpenses.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getTotalExpenses.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.totalExpenses = action.payload;
+      })
+      .addCase(getTotalExpenses.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+
       .addCase(loadExpense.fulfilled, (state, action) => {
         state.isEditMode = true;
-        state.expense = action.payload;
+        state.editExpenseData = action.payload;
       });
   },
 });
