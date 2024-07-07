@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Expense = require("../models/Expense");
 const Category = require("../models/Category");
 const moment = require("moment");
+const ExpenseSummary = require("../models/ExpenseSummary");
 
 const dateRanges = {
   daily: {
@@ -55,7 +56,10 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   const dateRange = dateRanges[type];
 
   const startIndex = (page - 1) * limit;
-  const total = await Expense.countDocuments({ user: req.user._id });
+  const total = await Expense.countDocuments({
+    user: req.user._id,
+    createdAt: { $gte: dateRange.start, $lte: dateRange.end },
+  });
 
   const expenses = await Expense.find({
     user: req.user._id,
@@ -106,80 +110,53 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getTotalExpenseByDateRange = asyncHandler(async (req, res, next) => {
-  const { start, end } = req.query;
+exports.getExpenseSummary = asyncHandler(async (req, res, next) => {
+  // yearly expense => year
+  // monthly expense => year , monthNumber
+  // weekly expense => year, weekNumber
+  // daily expense => year, monthNumber, dayNumber
 
-  if (start && end) {
-    const totalExpenses = await calculateTotalExpenseByDateRange(
-      req,
-      moment(start).startOf("day").toDate(),
-      moment(end).endOf("day").toDate()
-    );
-    return res.status(200).json({
-      totalExpenses,
-    });
+  const { year, month, week, day } = req.query;
+
+  const currentYear = parseInt(year || moment(Date.now()).format("YYYY"));
+
+  let query = { user: req.user._id };
+
+  if (day && month) {
+    query = {
+      ...query,
+      "day.year": currentYear,
+      "day.monthNumber": parseInt(week),
+      "day.dayNumber": parseInt(day),
+    };
+  } else if (week) {
+    query = {
+      ...query,
+      "week.year": currentYear,
+      "week.weekNumber": parseInt(week),
+    };
+  } else if (month) {
+    query = {
+      ...query,
+      "month.year": currentYear,
+      "month.monthNumber": parseInt(month),
+    };
+  } else {
+    query = {
+      ...query,
+      "year.year": currentYear,
+    };
   }
 
-  const [daily, weekly, monthly, yearly] = await Promise.all([
-    calculateTotalExpenseByDateRange(
-      req,
-      dateRanges.daily.start,
-      dateRanges.daily.end
-    ),
-    calculateTotalExpenseByDateRange(
-      req,
-      dateRanges.weekly.start,
-      dateRanges.weekly.end
-    ),
-    calculateTotalExpenseByDateRange(
-      req,
-      dateRanges.monthly.start,
-      dateRanges.monthly.end
-    ),
-    calculateTotalExpenseByDateRange(
-      req,
-      dateRanges.yearly.start,
-      dateRanges.yearly.end
-    ),
-  ]);
+  const response = await ExpenseSummary.findOne(query);
 
   res.status(200).json({
-    daily,
-    weekly,
-    monthly,
-    yearly,
+    daily: response?.day.totalAmount || 0,
+    weekly: response?.week.totalAmount || 0,
+    monthly: response?.month.totalAmount || 0,
+    yearly: response?.year.totalAmount || 0,
   });
 });
-
-const calculateTotalExpenseByDateRange = async (req, start, end) => {
-  try {
-    const totalExpenseData = await Expense.aggregate([
-      {
-        $match: {
-          user: req.user._id,
-          createdAt: {
-            $gte: start,
-            $lte: end,
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: {
-            $sum: "$amount",
-          },
-        },
-      },
-    ]);
-
-    return totalExpenseData[0]?.total || 0;
-  } catch (error) {
-    console.error("Error calculating total expense:", error);
-    res.status(500);
-    throw new Error("Failed to calculate total expense");
-  }
-};
 
 exports.putEditExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;

@@ -57,20 +57,22 @@ const deleteExpense = async (expenseId, token) => {
   return response.data;
 };
 
-const getTotalExpenses = async (start, end, token) => {
+const getTotalExpenses = async ({ year, month, week } = {}, token) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-  if (start && end) {
-    const response = await axios.get(
-      `${API_URL}/total?start=${start}&end=${end}`,
-      config
-    );
-    return response.data;
-  }
-  const response = await axios.get(`${API_URL}/total`, config);
+
+  const params = new URLSearchParams();
+
+  if (year) params.append("year", year);
+  if (month) params.append("month", month);
+  if (week) params.append("week", week);
+
+  const URL = `${API_URL}/summary?${params.toString()}`;
+
+  const response = await axios.get(URL, config);
   return response.data;
 };
 

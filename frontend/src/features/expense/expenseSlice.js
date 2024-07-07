@@ -56,14 +56,10 @@ export const getExpenses = createAsyncThunk(
 
 export const getTotalExpenses = createAsyncThunk(
   "expense/total",
-  async (dateRange, thunkAPI) => {
+  async (dateInfo, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await expenseService.getTotalExpenses(
-        dateRange.start || null,
-        dateRange.end || null,
-        token
-      );
+      return await expenseService.getTotalExpenses(dateInfo || null, token);
     } catch (error) {
       const message =
         (error.response &&

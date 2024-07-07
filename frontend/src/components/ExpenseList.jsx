@@ -37,7 +37,7 @@ const ExpenseList = () => {
 
   return (
     <Container fluid>
-      <Row className="flex-d">
+      <Row className="flex-d pt-3">
         <Col className="d-flex">
           <div className="mt-3">
             Total ({type}) : <b>₹{totalExpenses[type]}</b>
