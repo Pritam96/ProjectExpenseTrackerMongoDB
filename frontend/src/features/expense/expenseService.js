@@ -27,8 +27,6 @@ const getExpenses = async ({ type, pagination } = {}, token) => {
 
   const URL = `${API_URL}/?${params.toString()}`;
 
-  console.log(URL);
-
   const response = await axios.get(URL, config);
   return response.data;
 };
@@ -57,7 +55,7 @@ const deleteExpense = async (expenseId, token) => {
   return response.data;
 };
 
-const getTotalExpenses = async ({ year, month, week } = {}, token) => {
+const getTotalExpenses = async ({ day, year, month, week } = {}, token) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -65,10 +63,19 @@ const getTotalExpenses = async ({ year, month, week } = {}, token) => {
   };
 
   const params = new URLSearchParams();
-
-  if (year) params.append("year", year);
-  if (month) params.append("month", month);
-  if (week) params.append("week", week);
+  if (day && month && year && !week) {
+    params.append("day", day);
+    params.append("month", month);
+    params.append("year", year);
+  } else if (week && year && !month && !day) {
+    params.append("year", year);
+    params.append("week", week);
+  } else if (month && year && !day && !week) {
+    params.append("year", year);
+    params.append("month", month);
+  } else if (year && !month && !day && !week) {
+    params.append("year", year);
+  }
 
   const URL = `${API_URL}/summary?${params.toString()}`;
 

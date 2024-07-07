@@ -57,7 +57,11 @@ const ExpenseList = () => {
         </Col>
       </Row>
       <Row>
-        {expenses && expenses.length > 0 ? (
+        {isLoading ? (
+          <Container className="d-flex justify-content-center align-items-center mt-5">
+            <Spinner animation="border" />
+          </Container>
+        ) : expenses.length > 0 ? (
           expenses.map((expense) => (
             <div key={expense._id}>
               <ExpenseItem expense={expense} />
@@ -65,12 +69,6 @@ const ExpenseList = () => {
           ))
         ) : (
           <div className="h5 mt-5 text-center">No expenses found!</div>
-        )}
-
-        {isLoading && (
-          <Container className="d-flex justify-content-center align-items-center mt-5">
-            <Spinner animation="border" />
-          </Container>
         )}
       </Row>
       <Row>
