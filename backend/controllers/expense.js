@@ -1,27 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Expense = require("../models/Expense");
 const Category = require("../models/Category");
-const moment = require("moment");
-const ExpenseSummary = require("../models/ExpenseSummary");
-
-const dateRanges = {
-  daily: {
-    start: moment(Date.now()).startOf("day").toDate(),
-    end: moment(Date.now()).endOf("day").toDate(),
-  },
-  weekly: {
-    start: moment(Date.now()).startOf("week").toDate(),
-    end: moment(Date.now()).endOf("week").toDate(),
-  },
-  monthly: {
-    start: moment(Date.now()).startOf("month").toDate(),
-    end: moment(Date.now()).endOf("month").toDate(),
-  },
-  yearly: {
-    start: moment(Date.now()).startOf("year").toDate(),
-    end: moment(Date.now()).endOf("year").toDate(),
-  },
-};
 
 exports.postExpense = asyncHandler(async (req, res, next) => {
   const { title, amount, category, description } = req.body;
@@ -52,19 +31,20 @@ exports.postExpense = asyncHandler(async (req, res, next) => {
 exports.getExpenses = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 4;
-  const type = req.query.type || "daily";
-  const dateRange = dateRanges[type];
+  const start = req.query.start ? new Date(req.query.start) : null;
+  const end = req.query.end ? new Date(req.query.end) : null;
 
   const startIndex = (page - 1) * limit;
-  const total = await Expense.countDocuments({
-    user: req.user._id,
-    createdAt: { $gte: dateRange.start, $lte: dateRange.end },
-  });
 
-  const expenses = await Expense.find({
-    user: req.user._id,
-    createdAt: { $gte: dateRange.start, $lte: dateRange.end },
-  })
+  // Build the base query
+  const query = { user: req.user._id };
+  if (start && end) {
+    query.createdAt = { $gte: start, $lte: end };
+  }
+
+  const total = await Expense.countDocuments(query);
+
+  const expenses = await Expense.find(query)
     .skip(startIndex)
     .limit(limit)
     .populate({
@@ -86,8 +66,8 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
 
   // Build the pagination result
   const pagination = {
-    total: Math.ceil(total / limit),
-    current: page,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
   };
 
   if (startIndex + limit < total) {
@@ -107,54 +87,6 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     pagination,
     expenses: transformedExpenses,
-  });
-});
-
-exports.getExpenseSummary = asyncHandler(async (req, res, next) => {
-  // yearly expense => year
-  // monthly expense => year , monthNumber
-  // weekly expense => year, weekNumber
-  // daily expense => year, monthNumber, dayNumber
-
-  const { year, month, week, day } = req.query;
-
-  const currentYear = parseInt(year || moment(Date.now()).format("YYYY"));
-
-  let query = { user: req.user._id };
-
-  if (day && month) {
-    query = {
-      ...query,
-      "day.year": currentYear,
-      "day.monthNumber": parseInt(week),
-      "day.dayNumber": parseInt(day),
-    };
-  } else if (week) {
-    query = {
-      ...query,
-      "week.year": currentYear,
-      "week.weekNumber": parseInt(week),
-    };
-  } else if (month) {
-    query = {
-      ...query,
-      "month.year": currentYear,
-      "month.monthNumber": parseInt(month),
-    };
-  } else {
-    query = {
-      ...query,
-      "year.year": currentYear,
-    };
-  }
-
-  const response = await ExpenseSummary.findOne(query);
-
-  res.status(200).json({
-    daily: response?.day.totalAmount || 0,
-    weekly: response?.week.totalAmount || 0,
-    monthly: response?.month.totalAmount || 0,
-    yearly: response?.year.totalAmount || 0,
   });
 });
 

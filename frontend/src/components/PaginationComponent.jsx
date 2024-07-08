@@ -5,9 +5,9 @@ const PaginationComponent = ({ pagination, onPageChange }) => {
     onPageChange(page);
   };
 
-  let active = pagination.current;
+  let active = pagination.currentPage;
   let items = [];
-  for (let number = 1; number <= pagination.total; number++) {
+  for (let number = 1; number <= pagination.totalPages; number++) {
     items.push(
       <Pagination.Item
         key={number}

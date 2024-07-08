@@ -13,7 +13,6 @@ import { getCategories } from "../features/category/categorySlice";
 import {
   createExpense,
   editExpense,
-  getTotalExpenses,
   reset,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
@@ -62,9 +61,6 @@ const ExpenseForm = () => {
         })
       ).then(() => {
         toast.success("Expense Updated");
-        if (amount !== editExpenseData.amount) {
-          dispatch(getTotalExpenses({}));
-        }
         setExpenseId("");
         setTitle("");
         setAmount("");

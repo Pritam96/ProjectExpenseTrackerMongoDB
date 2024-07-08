@@ -4,12 +4,6 @@ import expenseService from "./expenseService";
 const initialState = {
   expenses: [],
   pagination: {},
-  totalExpenses: {
-    daily: 0,
-    weekly: 0,
-    monthly: 0,
-    yearly: 0,
-  },
   isError: false,
   isSuccess: false,
   isLoading: false,
@@ -42,24 +36,6 @@ export const getExpenses = createAsyncThunk(
     try {
       const token = thunkAPI.getState().auth.user.token;
       return await expenseService.getExpenses(parameters, token);
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
-export const getTotalExpenses = createAsyncThunk(
-  "expense/total",
-  async (dateInfo, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-      return await expenseService.getTotalExpenses(dateInfo || null, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -186,20 +162,6 @@ const expenseSlice = createSlice({
         );
       })
       .addCase(deleteExpense.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
-      })
-
-      .addCase(getTotalExpenses.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getTotalExpenses.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.totalExpenses = action.payload;
-      })
-      .addCase(getTotalExpenses.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
