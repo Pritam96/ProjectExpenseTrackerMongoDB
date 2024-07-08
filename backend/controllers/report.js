@@ -14,29 +14,24 @@ exports.getExpensesByRange = asyncHandler(async (req, res, next) => {
   // Pagination
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 4;
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const total = await Expense.countDocuments({
-    user: req.user._id,
-    createdAt: {
-      $gte: startDate,
-      $lte: endDate,
-    },
+  const skip = (page - 1) * limit;
+
+  const userId = req.user._id;
+  const start = moment(startDate).startOf("day").toDate();
+  const end = moment(endDate).endOf("day").toDate();
+
+  const totalExpenses = await Expense.countDocuments({
+    user: userId,
+    createdAt: { $gte: start, $lte: end },
   });
 
   const expenses = await Expense.find({
-    user: req.user._id,
-    createdAt: {
-      $gte: startDate,
-      $lte: endDate,
-    },
+    user: userId,
+    createdAt: { $gte: start, $lte: end },
   })
-    .skip(startIndex)
+    .skip(skip)
     .limit(limit)
-    .populate({
-      path: "category",
-      select: "title",
-    });
+    .populate({ path: "category", select: "title" });
 
   const transformedExpenses = expenses.map((expense) => ({
     _id: expense._id,
@@ -48,20 +43,37 @@ exports.getExpensesByRange = asyncHandler(async (req, res, next) => {
     updatedAt: expense.updatedAt,
   }));
 
+  const totalExpenseData = await Expense.aggregate([
+    {
+      $match: {
+        user: userId,
+        createdAt: { $gte: start, $lte: end },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  const totalExpense = totalExpenseData[0]?.total || 0;
+
   // Pagination result
-  const pagination = {};
+  const pagination = {
+    total: Math.ceil(totalExpenses / limit),
+    current: page,
+  };
 
-  if (total > 0) pagination.total = Math.ceil(total / limit);
-  if (page) pagination.current = page;
-
-  if (endIndex < total) {
+  if (page * limit < totalExpenses) {
     pagination.next = {
       page: page + 1,
       limit,
     };
   }
 
-  if (startIndex > 0) {
+  if (skip > 0) {
     pagination.prev = {
       page: page - 1,
       limit,
@@ -70,7 +82,7 @@ exports.getExpensesByRange = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     pagination,
-    count: transformedExpenses.length,
+    totalExpense,
     expenses: transformedExpenses,
   });
 });
