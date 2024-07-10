@@ -91,11 +91,41 @@ export const loadExpense = createAsyncThunk(
   }
 );
 
+export const exportExpenses = createAsyncThunk(
+  "expense/export",
+  async (dateRange, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      const csvData = await expenseService.exportExpenses(dateRange, token);
+
+      // Create a URL for the binary data
+      const url = window.URL.createObjectURL(
+        new Blob([csvData], { type: "text/csv" })
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `expenses_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const expenseSlice = createSlice({
   name: "expense",
   initialState,
   reducers: {
-    reset: (state) => {
+    resetToInitialState: () => initialState,
+    resetWithoutExpenses: (state) => {
+      state.pagination = {};
       state.isError = false;
       state.isSuccess = false;
       state.isLoading = false;
@@ -141,6 +171,8 @@ const expenseSlice = createSlice({
       .addCase(editExpense.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.isEditMode = false;
+        state.editExpenseData = {};
         state.expenses = state.expenses.map((expense) =>
           expense._id === action.payload._id ? action.payload : expense
         );
@@ -170,9 +202,23 @@ const expenseSlice = createSlice({
       .addCase(loadExpense.fulfilled, (state, action) => {
         state.isEditMode = true;
         state.editExpenseData = action.payload;
+      })
+
+      .addCase(exportExpenses.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(exportExpenses.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+      })
+      .addCase(exportExpenses.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
       });
   },
 });
 
-export const { reset } = expenseSlice.actions;
+export const { resetToInitialState, resetWithoutExpenses } =
+  expenseSlice.actions;
 export default expenseSlice.reducer;

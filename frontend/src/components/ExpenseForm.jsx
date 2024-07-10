@@ -6,14 +6,14 @@ import {
   FormGroup,
   FormLabel,
   FormSelect,
+  Form,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { Form } from "react-router-dom";
 import { getCategories } from "../features/category/categorySlice";
 import {
   createExpense,
   editExpense,
-  reset,
+  resetWithoutExpenses,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
 
@@ -33,18 +33,24 @@ const ExpenseForm = () => {
   );
 
   useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (isError) {
       toast.error(message);
     }
-    if (isEditMode) {
+  }, [isError, message]);
+
+  useEffect(() => {
+    if (isEditMode && editExpenseData) {
       setExpenseId(editExpenseData._id);
       setTitle(editExpenseData.title);
       setAmount(editExpenseData.amount);
-      setDescription(editExpenseData.description);
+      setDescription(editExpenseData.description || "");
       setCategory(editExpenseData.categoryId);
     }
-    dispatch(getCategories());
-  }, [dispatch, isEditMode, editExpenseData, isError, message]);
+  }, [isEditMode]);
 
   const formHandler = (e) => {
     e.preventDefault();
@@ -61,12 +67,8 @@ const ExpenseForm = () => {
         })
       ).then(() => {
         toast.success("Expense Updated");
-        setExpenseId("");
-        setTitle("");
-        setAmount("");
-        setDescription("");
-        setCategory("");
-        dispatch(reset());
+        dispatch(resetWithoutExpenses());
+        resetForm();
       });
     } else {
       const expenseData = {
@@ -77,14 +79,18 @@ const ExpenseForm = () => {
       };
       dispatch(createExpense(expenseData)).then(() => {
         toast.success("Expense Added");
-        dispatch(reset());
-        setExpenseId("");
-        setTitle("");
-        setAmount("");
-        setDescription("");
-        setCategory("");
+        dispatch(resetWithoutExpenses());
+        resetForm();
       });
     }
+  };
+
+  const resetForm = () => {
+    setExpenseId("");
+    setTitle("");
+    setAmount("");
+    setDescription("");
+    setCategory("");
   };
 
   return (

@@ -58,10 +58,28 @@ const deleteExpense = async (expenseId, token) => {
   return response.data;
 };
 
+const exportExpenses = async (dateRange, token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    responseType: "blob",
+  };
+  const params = new URLSearchParams();
+  if (dateRange) {
+    params.append("start", dateRange.start);
+    params.append("end", dateRange.end);
+  }
+  const URL = `${API_URL}/export?${params.toString()}`;
+  const response = await axios.get(URL, config);
+  return response.data;
+};
+
 const authService = {
   create,
   getExpenses,
   editExpense,
   deleteExpense,
+  exportExpenses,
 };
 export default authService;

@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getExpenses } from "../features/expense/expenseSlice";
+import {
+  getExpenses,
+  resetToInitialState,
+  resetWithoutExpenses,
+} from "../features/expense/expenseSlice";
 import ExpenseItem from "./ExpenseItem";
 import { Col, Container, FormSelect, Row, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -9,20 +13,20 @@ import moment from "moment";
 
 const dateRanges = {
   daily: {
-    start: moment(Date.now()).startOf("day").toISOString(),
-    end: moment(Date.now()).endOf("day").toISOString(),
+    start: moment().startOf("day").toISOString(),
+    end: moment().endOf("day").toISOString(),
   },
   weekly: {
-    start: moment(Date.now()).startOf("week").toISOString(),
-    end: moment(Date.now()).endOf("week").toISOString(),
+    start: moment().startOf("week").toISOString(),
+    end: moment().endOf("week").toISOString(),
   },
   monthly: {
-    start: moment(Date.now()).startOf("month").toISOString(),
-    end: moment(Date.now()).endOf("month").toISOString(),
+    start: moment().startOf("month").toISOString(),
+    end: moment().endOf("month").toISOString(),
   },
   yearly: {
-    start: moment(Date.now()).startOf("year").toISOString(),
-    end: moment(Date.now()).endOf("year").toISOString(),
+    start: moment().startOf("year").toISOString(),
+    end: moment().endOf("year").toISOString(),
   },
 };
 
@@ -35,15 +39,30 @@ const ExpenseList = () => {
   );
 
   useEffect(() => {
+    dispatch(resetToInitialState());
+    fetchExpenses();
+    return () => {
+      dispatch(resetWithoutExpenses());
+    };
+  }, [type, pagination.limit]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+      dispatch(resetToInitialState());
+    }
+  }, [isError, message, dispatch]);
+
+  const fetchExpenses = () => {
     dispatch(
       getExpenses({
         dateRange: { start: dateRanges[type].start, end: dateRanges[type].end },
+        pagination: { page: 1, limit: pagination.limit || 4 },
       })
-    );
-    if (isError) {
-      toast.error(message);
-    }
-  }, [dispatch, message, isError, type]);
+    ).finally(() => {
+      dispatch(resetWithoutExpenses());
+    });
+  };
 
   const handlePageChange = (page) => {
     dispatch(
@@ -54,15 +73,14 @@ const ExpenseList = () => {
           limit: pagination.limit,
         },
       })
-    );
+    ).finally(() => {
+      dispatch(resetWithoutExpenses());
+    });
   };
 
   return (
     <Container fluid>
       <Row className="flex-d pt-3">
-        <Col className="d-flex">
-          {/* <div className="mt-3">Total Expenses: </div> */}
-        </Col>
         <Col className="d-flex justify-content-end">
           <FormSelect
             className="w-auto"

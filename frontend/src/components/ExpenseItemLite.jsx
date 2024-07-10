@@ -15,12 +15,13 @@ import { toast } from "react-toastify";
 import {
   resetToInitialState,
   deleteExpense,
-  loadExpense,
   resetWithoutExpenses,
 } from "../features/expense/expenseSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const ExpenseItem = ({ expense }) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
   const dispatch = useDispatch();
   const { isError, message } = useSelector((state) => state.expenses);
 
@@ -31,10 +32,6 @@ const ExpenseItem = ({ expense }) => {
     }
   }, [isError, message, dispatch]);
 
-  const editHandler = () => {
-    dispatch(loadExpense(expense));
-  };
-
   const deleteHandler = () => {
     dispatch(deleteExpense(expense._id)).then(() => {
       toast.success("Expense Deleted");
@@ -42,22 +39,30 @@ const ExpenseItem = ({ expense }) => {
     });
   };
 
+  const cardClickHandler = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <Card className="mt-3 shadow">
+    <Card className="mt-3 shadow" onClick={cardClickHandler}>
       <CardBody>
         <Row>
-          <Col xs={3} className="d-flex align-items-center">
-            <CardTitle>
+          <Col xs={isCollapsed ? 4 : 3} className="d-flex align-items-center">
+            <CardTitle className="mb-0">
               <h3>₹{expense.amount}</h3>
             </CardTitle>
           </Col>
-          <Col xs={6}>
+          <Col xs={isCollapsed ? 8 : 6}>
             <Row>
               <CardSubtitle>
-                <h4>{expense.title}</h4>
+                {isCollapsed ? (
+                  <h5>{expense.title}</h5>
+                ) : (
+                  <h4>{expense.title}</h4>
+                )}
               </CardSubtitle>
             </Row>
-            {expense?.description && (
+            {!isCollapsed && expense?.description && (
               <Row>
                 <CardText>{expense.description}</CardText>
               </Row>
@@ -71,26 +76,20 @@ const ExpenseItem = ({ expense }) => {
               </Badge>
             </Row>
           </Col>
-          <Col xs={3}>
-            <div className="d-grid gap-2">
-              <Button
-                type="button"
-                variant="info"
-                size="sm"
-                onClick={editHandler}
-              >
-                Edit
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                onClick={deleteHandler}
-              >
-                Delete
-              </Button>
-            </div>
-          </Col>
+          {!isCollapsed && (
+            <Col xs={3}>
+              <div className="d-grid gap-2">
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  onClick={deleteHandler}
+                >
+                  Delete
+                </Button>
+              </div>
+            </Col>
+          )}
         </Row>
       </CardBody>
     </Card>
