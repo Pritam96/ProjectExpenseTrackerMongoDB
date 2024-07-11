@@ -34,9 +34,8 @@ const ExpenseList = () => {
   const [type, setType] = useState("daily");
 
   const dispatch = useDispatch();
-  const { expenses, isError, isLoading, message, pagination } = useSelector(
-    (state) => state.expenses
-  );
+  const { expenses, count, isError, isLoading, message, pagination } =
+    useSelector((state) => state.expenses);
 
   useEffect(() => {
     dispatch(resetToInitialState());
@@ -44,7 +43,7 @@ const ExpenseList = () => {
     return () => {
       dispatch(resetWithoutExpenses());
     };
-  }, [type, pagination.limit]);
+  }, [type]);
 
   useEffect(() => {
     if (isError) {
@@ -57,7 +56,7 @@ const ExpenseList = () => {
     dispatch(
       getExpenses({
         dateRange: { start: dateRanges[type].start, end: dateRanges[type].end },
-        pagination: { page: 1, limit: pagination.limit || 4 },
+        pagination: { page: 1, limit: pagination?.next?.limit || 4 },
       })
     ).finally(() => {
       dispatch(resetWithoutExpenses());
@@ -70,7 +69,7 @@ const ExpenseList = () => {
         dateRange: { start: dateRanges[type].start, end: dateRanges[type].end },
         pagination: {
           page: page,
-          limit: pagination.limit,
+          limit: pagination?.next?.limit || 4,
         },
       })
     ).finally(() => {
@@ -81,6 +80,10 @@ const ExpenseList = () => {
   return (
     <Container fluid>
       <Row className="flex-d pt-3">
+        <Col className="d-flex justify-content-start align-items-center">
+          {" "}
+          {count > 0 ? `Total ${count} records found` : null}
+        </Col>
         <Col className="d-flex justify-content-end">
           <FormSelect
             className="w-auto"

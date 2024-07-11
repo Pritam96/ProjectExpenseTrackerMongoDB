@@ -88,6 +88,7 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     pagination,
+    count: total,
     expenses: transformedExpenses,
   });
 });

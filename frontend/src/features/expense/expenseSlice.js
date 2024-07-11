@@ -3,6 +3,7 @@ import expenseService from "./expenseService";
 
 const initialState = {
   expenses: [],
+  count: 0,
   pagination: {},
   isError: false,
   isSuccess: false,
@@ -125,7 +126,6 @@ const expenseSlice = createSlice({
   reducers: {
     resetToInitialState: () => initialState,
     resetWithoutExpenses: (state) => {
-      state.pagination = {};
       state.isError = false;
       state.isSuccess = false;
       state.isLoading = false;
@@ -156,6 +156,7 @@ const expenseSlice = createSlice({
       .addCase(getExpenses.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.count = action.payload.count;
         state.expenses = action.payload.expenses;
         state.pagination = action.payload.pagination;
       })

@@ -26,9 +26,8 @@ const Reports = () => {
   const [limit, setLimit] = useState("4");
 
   const dispatch = useDispatch();
-  const { expenses, isError, isLoading, message, pagination } = useSelector(
-    (state) => state.expenses
-  );
+  const { expenses, count, isError, isLoading, message, pagination } =
+    useSelector((state) => state.expenses);
 
   useEffect(() => {
     dispatch(resetToInitialState());
@@ -112,6 +111,10 @@ const Reports = () => {
         <Col md={7}>
           <Container fluid>
             <Row className="pt-3">
+              <Col className="d-flex justify-content-start align-items-center">
+                {" "}
+                {count > 0 ? `Total ${count} records found` : null}
+              </Col>
               <Col className="d-flex justify-content-end">
                 <FormSelect
                   className="w-auto"
