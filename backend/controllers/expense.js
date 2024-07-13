@@ -3,6 +3,7 @@ const Expense = require("../models/Expense");
 const Category = require("../models/Category");
 const { Parser } = require("json2csv");
 const moment = require("moment");
+const TotalExpense = require("../models/TotalExpense");
 
 exports.postExpense = asyncHandler(async (req, res, next) => {
   const { title, amount, category, description } = req.body;
@@ -55,6 +56,10 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
     })
     .sort({ createdAt: -1 });
 
+  const totalExpenseData = await TotalExpense.findOne({
+    user: req.user._id,
+  });
+
   const transformedExpenses = expenses.map((expense) => ({
     _id: expense._id,
     title: expense.title,
@@ -89,6 +94,7 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     pagination,
     count: total,
+    totalAmount: totalExpenseData?.totalAmount || 0,
     expenses: transformedExpenses,
   });
 });
@@ -158,13 +164,30 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
   const expenses = await Expense.find({
     user: req.user._id,
     createdAt: {
-      $gte: start,
-      $lte: end,
+      $gte: new Date(start),
+      $lte: new Date(end),
     },
   }).populate({
     path: "category",
     select: "title",
   });
+
+  const totalExpenseData = await Expense.aggregate([
+    {
+      $match: {
+        user: req.user._id,
+        createdAt: { $gte: new Date(start), $lte: new Date(end) },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  const totalExpense = totalExpenseData[0]?.total || 0;
 
   const transformedExpenses = expenses.map((expense) => ({
     id: expense._id.toString(),
@@ -176,6 +199,16 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
     updated: moment(expense.updatedAt).format("MMMM Do YYYY, h:mm:ss a"),
   }));
 
+  transformedExpenses.push({
+    id: "",
+    title: "Total Expense",
+    category: "",
+    amount: totalExpense,
+    description: "",
+    created: "",
+    updated: "",
+  });
+
   const csvFields = [
     { label: "ID", value: "id" },
     { label: "Title", value: "title" },
@@ -186,13 +219,13 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
     { label: "Updated", value: "updated" },
   ];
 
-  const csvParser = new Parser({ csvFields });
+  const csvParser = new Parser({ fields: csvFields });
   const csvData = csvParser.parse(transformedExpenses);
 
   res.setHeader("Content-Type", "text/csv");
   res.setHeader(
     "Content-Disposition",
-    `attachment: filename=expenses_${Date.now()}.csv`
+    `attachment; filename=expenses_${Date.now()}.csv`
   );
 
   res.status(200).end(csvData);

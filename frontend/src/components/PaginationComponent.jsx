@@ -2,6 +2,7 @@ import { Pagination } from "react-bootstrap";
 
 const PaginationComponent = ({ pagination, onPageChange }) => {
   const clickHandler = (page) => {
+    if (page === pagination.currentPage) return;
     onPageChange(page);
   };
 

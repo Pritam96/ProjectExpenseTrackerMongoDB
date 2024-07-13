@@ -7,6 +7,9 @@ import {
   FormLabel,
   FormSelect,
   Form,
+  Col,
+  Card,
+  CardBody,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../features/category/categorySlice";
@@ -28,9 +31,8 @@ const ExpenseForm = () => {
 
   const { categories } = useSelector((state) => state.categories);
 
-  const { isEditMode, editExpenseData, isError, message } = useSelector(
-    (state) => state.expenses
-  );
+  const { isEditMode, editExpenseData, isError, message, totalExpense } =
+    useSelector((state) => state.expenses);
 
   useEffect(() => {
     dispatch(getCategories());
@@ -95,6 +97,18 @@ const ExpenseForm = () => {
 
   return (
     <Container fluid>
+      {totalExpense ? (
+        <Card className="text-end">
+          <CardBody className="flex-column">
+            <Col className="m-3">
+              <h3>Total Expense:</h3>
+            </Col>
+            <Col className="m-3">
+              <h2>₹{totalExpense}</h2>
+            </Col>
+          </CardBody>
+        </Card>
+      ) : null}
       <Form onSubmit={formHandler}>
         <FormGroup className="my-3" controlId="title">
           <FormLabel className="h5">Title</FormLabel>

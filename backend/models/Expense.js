@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const TotalExpense = require("./TotalExpense");
 
 const ExpenseSchema = new Schema(
   {
@@ -27,5 +28,32 @@ const ExpenseSchema = new Schema(
   },
   { timestamps: true }
 );
+
+ExpenseSchema.post("save", async function (doc) {
+  await updateTotalExpense(doc.user, doc.amount);
+});
+
+ExpenseSchema.post("findOneAndDelete", async function (doc) {
+  await updateTotalExpense(doc.user, -doc.amount);
+});
+
+ExpenseSchema.pre("findOneAndUpdate", async function (next) {
+  const docToUpdate = await this.model.findOne(this.getQuery());
+  this._originalAmount = docToUpdate.amount;
+  next();
+});
+
+ExpenseSchema.post("findOneAndUpdate", async function (doc) {
+  const amountDifference = doc.amount - this._originalAmount;
+  await updateTotalExpense(doc.user, amountDifference);
+});
+
+async function updateTotalExpense(userId, amount) {
+  await TotalExpense.findOneAndUpdate(
+    { user: userId },
+    { $inc: { totalAmount: amount } },
+    { upsert: true }
+  );
+}
 
 module.exports = mongoose.model("Expense", ExpenseSchema);

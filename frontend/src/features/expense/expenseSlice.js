@@ -4,6 +4,7 @@ import expenseService from "./expenseService";
 const initialState = {
   expenses: [],
   count: 0,
+  totalExpense: 0,
   pagination: {},
   isError: false,
   isSuccess: false,
@@ -143,6 +144,8 @@ const expenseSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.expenses.unshift(action.payload);
+        state.totalExpense += action.payload.amount;
+        state.count += 1;
       })
       .addCase(createExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -157,6 +160,7 @@ const expenseSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.count = action.payload.count;
+        state.totalExpense = action.payload.totalAmount;
         state.expenses = action.payload.expenses;
         state.pagination = action.payload.pagination;
       })
@@ -174,9 +178,14 @@ const expenseSlice = createSlice({
         state.isSuccess = true;
         state.isEditMode = false;
         state.editExpenseData = {};
+        const existingExpense = state.expenses.find(
+          (expense) => expense._id === action.payload._id
+        );
+        const amountDifference = action.payload.amount - existingExpense.amount;
         state.expenses = state.expenses.map((expense) =>
           expense._id === action.payload._id ? action.payload : expense
         );
+        state.totalExpense += amountDifference;
       })
       .addCase(editExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -190,9 +199,14 @@ const expenseSlice = createSlice({
       .addCase(deleteExpense.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        const deletedExpense = state.expenses.find(
+          (expense) => expense._id === action.payload._id
+        );
         state.expenses = state.expenses.filter(
           (expense) => expense._id !== action.payload._id
         );
+        state.totalExpense -= deletedExpense.amount;
+        state.count -= 1;
       })
       .addCase(deleteExpense.rejected, (state, action) => {
         state.isLoading = false;
