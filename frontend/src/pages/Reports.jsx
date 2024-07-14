@@ -1,158 +1,85 @@
+import { useEffect } from "react";
 import {
-  Button,
+  Card,
+  CardBody,
+  CardSubtitle,
+  CardText,
+  CardTitle,
   Col,
   Container,
-  FormSelect,
   Row,
   Spinner,
 } from "react-bootstrap";
-import DateRangePicker from "../components/DateRangePicker";
-import { useEffect, useState } from "react";
-import PaginationComponent from "../components/PaginationComponent";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  exportExpenses,
-  getExpenses,
-  resetToInitialState,
-  resetWithoutExpenses,
-} from "../features/expense/expenseSlice";
-import { toast } from "react-toastify";
-import ExpenseItemLite from "../components/ExpenseItemLite";
-import moment from "moment";
+import { getLeaderboard } from "../features/reports/reportSlice";
 
 const Reports = () => {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [limit, setLimit] = useState("4");
-
   const dispatch = useDispatch();
-  const { expenses, count, isError, isLoading, message, pagination } =
-    useSelector((state) => state.expenses);
+  const { data, isError, isSuccess, isLoading, message } = useSelector(
+    (state) => state.reports
+  );
 
   useEffect(() => {
-    dispatch(resetToInitialState());
-    if (startDate && endDate) {
-      dispatch(
-        getExpenses({
-          dateRange: {
-            start: moment(startDate).toISOString(),
-            end: moment(endDate).toISOString(),
-          },
-          pagination: {
-            page: pagination.current || 1,
-            limit: parseInt(limit, 10),
-          },
-        })
-      );
-    }
-
-    return () => {
-      dispatch(resetWithoutExpenses());
-    };
-  }, [startDate, endDate, dispatch, limit, pagination.current]);
-
-  useEffect(() => {
-    if (isError) {
-      toast.error(message);
-      dispatch(resetToInitialState());
-    }
-  }, [isError, message, dispatch]);
-
-  const handlePageChange = (page) => {
-    dispatch(
-      getExpenses({
-        dateRange: {
-          start: moment(startDate).toISOString(),
-          end: moment(endDate).toISOString(),
-        },
-        pagination: {
-          page: page,
-          limit: parseInt(limit, 10),
-        },
-      })
-    );
-  };
-
-  const downloadHandler = () => {
-    dispatch(
-      exportExpenses({
-        start: moment(startDate).toISOString(),
-        end: moment(endDate).toISOString(),
-      })
-    );
-    dispatch(resetWithoutExpenses());
-  };
+    dispatch(getLeaderboard());
+  }, [dispatch]);
 
   return (
-    <Container>
-      <Row>
-        <Col md={5} className="mt-4">
-          <Container fluid>
-            <Row className="justify-content-center">
-              <div className="my-2 text-center">
-                <div className="h5">Choose a range</div>
-                <DateRangePicker
-                  onDateChange={(startDate, endDate) => {
-                    setStartDate(startDate);
-                    setEndDate(endDate);
-                  }}
-                />
-              </div>
-            </Row>
-            {expenses.length > 0 && (
-              <Row className="justify-content-center">
-                <Button className="w-auto" onClick={downloadHandler}>
-                  Download
-                </Button>
-              </Row>
-            )}
-          </Container>
-        </Col>
-        <Col md={7}>
-          <Container fluid>
-            <Row className="pt-3">
-              <Col className="d-flex justify-content-start align-items-center">
-                {" "}
-                {count > 0 ? `Total ${count} records found` : null}
-              </Col>
-              <Col className="d-flex justify-content-end">
-                <FormSelect
-                  className="w-auto"
-                  value={limit}
-                  onChange={(e) => setLimit(e.target.value)}
-                >
-                  <option value="4">4</option>
-                  <option value="8">8</option>
-                  <option value="10">10</option>
-                  <option value="15">15</option>
-                </FormSelect>
-              </Col>
-            </Row>
+    <>
+      <Container>
+        <Row>
+          <Col md={4} className="mt-4">
+            <h3>Leader Board</h3>
+          </Col>
+          <Col md={8}>
             <Row>
               {isLoading ? (
                 <Container className="d-flex justify-content-center align-items-center mt-5">
                   <Spinner animation="border" />
                 </Container>
-              ) : expenses.length > 0 ? (
-                expenses.map((expense) => (
-                  <div key={expense._id}>
-                    <ExpenseItemLite expense={expense} />
+              ) : data.length > 0 ? (
+                data.map((item) => (
+                  <div key={item._id}>
+                    <Card className="mt-3 shadow">
+                      <CardBody>
+                        <Row className="flex-row align-items-center justify-content-between">
+                          <Col md={3} sm={3} xs={3}>
+                            <CardText className="h3 text-center">{item.position}</CardText>
+                          </Col>
+                          <Col md={6} sm={6} xs={6}>
+                            <Row>
+                              <CardText className="h5">
+                                {item.username}
+                              </CardText>
+                            </Row>
+                            <Row>
+                              <CardText className="text-muted">
+                                {item.email}
+                              </CardText>
+                            </Row>
+                            <Row>
+                              <CardText className="h5 text-muted">
+                                {item.phoneNumber}
+                              </CardText>
+                            </Row>
+                          </Col>
+                          <Col md={3} sm={3} xs={3}>
+                            <CardText className="h2">
+                              ₹{item.totalAmount}
+                            </CardText>
+                          </Col>
+                        </Row>
+                      </CardBody>
+                    </Card>
                   </div>
                 ))
               ) : (
                 <div className="h5 mt-5 text-center">No expenses found!</div>
               )}
             </Row>
-            <Row>
-              <PaginationComponent
-                pagination={pagination}
-                onPageChange={handlePageChange}
-              />
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 };
 

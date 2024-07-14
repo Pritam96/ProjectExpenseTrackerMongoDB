@@ -19,6 +19,7 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import Expenses from "./pages/Expenses.jsx";
+import Export from "./pages/Export.jsx";
 import Reports from "./pages/Reports.jsx";
 
 const router = createBrowserRouter(
@@ -32,6 +33,7 @@ const router = createBrowserRouter(
 
       <Route path="" element={<PrivateRoute />}>
         <Route path="/expense" element={<Expenses />}></Route>
+        <Route path="/export" element={<Export />}></Route>
         <Route path="/reports" element={<Reports />}></Route>
       </Route>
     </Route>

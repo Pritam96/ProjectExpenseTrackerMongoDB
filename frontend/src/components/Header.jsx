@@ -45,6 +45,11 @@ const Header = () => {
                       Expenses
                     </NavLink>
                   </LinkContainer>
+                  <LinkContainer to="/export">
+                    <NavLink className="d-flex align-items-center">
+                      Export
+                    </NavLink>
+                  </LinkContainer>
                   <LinkContainer to="/reports">
                     <NavLink className="d-flex align-items-center">
                       Reports
