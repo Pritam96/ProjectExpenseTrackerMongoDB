@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import {
   Card,
   CardBody,
-  CardSubtitle,
   CardText,
-  CardTitle,
   Col,
   Container,
   Row,
@@ -12,10 +10,11 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { getLeaderboard } from "../features/reports/reportSlice";
+import { toast } from "react-toastify";
 
 const Reports = () => {
   const dispatch = useDispatch();
-  const { data, isError, isSuccess, isLoading, message } = useSelector(
+  const { data, isError, isLoading, message } = useSelector(
     (state) => state.reports
   );
 
@@ -23,12 +22,18 @@ const Reports = () => {
     dispatch(getLeaderboard());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+    }
+  }, [isError, message]);
+
   return (
     <>
       <Container>
         <Row>
           <Col md={4} className="mt-4">
-            <h3>Leader Board</h3>
+            <h3>Leader-Board</h3>
           </Col>
           <Col md={8}>
             <Row>
@@ -43,7 +48,9 @@ const Reports = () => {
                       <CardBody>
                         <Row className="flex-row align-items-center justify-content-between">
                           <Col md={3} sm={3} xs={3}>
-                            <CardText className="h3 text-center">{item.position}</CardText>
+                            <CardText className="h3 text-center">
+                              {item.position}
+                            </CardText>
                           </Col>
                           <Col md={6} sm={6} xs={6}>
                             <Row>
