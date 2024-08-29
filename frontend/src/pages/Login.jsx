@@ -11,15 +11,15 @@ import {
 } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { FaSignInAlt } from "react-icons/fa";
-import FormContainer from "../components/FormContainer";
-import { useEffect, useState } from "react";
+import FormContainer from "../components/UI/FormContainer";
+import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, reset } from "../features/auth/authSlice";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -44,7 +44,9 @@ const Login = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    const enteredEmail = emailInputRef.current.value;
+    const enteredPassword = passwordInputRef.current.value;
+    dispatch(login({ email: enteredEmail, password: enteredPassword }));
   };
 
   if (isLoading) {
@@ -67,8 +69,7 @@ const Login = () => {
           <FormControl
             type="email"
             placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            ref={emailInputRef}
           />
         </FormGroup>
 
@@ -77,8 +78,7 @@ const Login = () => {
           <FormControl
             type="password"
             placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            ref={passwordInputRef}
           />
         </FormGroup>
 

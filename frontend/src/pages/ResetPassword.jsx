@@ -7,16 +7,16 @@ import {
   FormLabel,
   Spinner,
 } from "react-bootstrap";
-import FormContainer from "../components/FormContainer";
-import { useEffect, useState } from "react";
+import FormContainer from "../components/UI/FormContainer";
+import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { reset, resetPassword } from "../features/auth/authSlice";
 
 const ResetPassword = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const passwordInputRef = useRef();
+  const confirmPasswordInputRef = useRef();
 
   const { token } = useParams();
   const navigate = useNavigate();
@@ -46,11 +46,13 @@ const ResetPassword = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    const enteredPassword = passwordInputRef.current.value;
+    const enteredConfirmPassword = confirmPasswordInputRef.current.value;
+    if (enteredPassword !== enteredConfirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-    dispatch(resetPassword({ token, password }));
+    dispatch(resetPassword({ token, password: enteredPassword }));
   };
 
   if (isLoading) {
@@ -70,8 +72,7 @@ const ResetPassword = () => {
           <FormControl
             type="password"
             placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            ref={passwordInputRef}
           />
         </FormGroup>
 
@@ -80,8 +81,7 @@ const ResetPassword = () => {
           <FormControl
             type="password"
             placeholder="Confirm password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            ref={confirmPasswordInputRef}
           />
         </FormGroup>
 

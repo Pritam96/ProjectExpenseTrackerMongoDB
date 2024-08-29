@@ -15,14 +15,17 @@ import {
   FaWallet,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+import { logout } from "../../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   const logoutHandler = () => {
     dispatch(logout());
+    navigate("/");
   };
 
   return (

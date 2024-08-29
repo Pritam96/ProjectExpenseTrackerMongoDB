@@ -4,11 +4,11 @@ import {
   getExpenses,
   resetToInitialState,
   resetWithoutExpenses,
-} from "../features/expense/expenseSlice";
+} from "../../features/expense/expenseSlice";
 import ExpenseItem from "./ExpenseItem";
 import { Col, Container, FormSelect, Row, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
-import PaginationComponent from "./PaginationComponent";
+import PaginationComponent from "../UI/PaginationComponent";
 import moment from "moment";
 
 const dateRanges = {

@@ -12,12 +12,12 @@ import {
   CardBody,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { getCategories } from "../features/category/categorySlice";
+import { getCategories } from "../../features/category/categorySlice";
 import {
   createExpense,
   editExpense,
   resetWithoutExpenses,
-} from "../features/expense/expenseSlice";
+} from "../../features/expense/expenseSlice";
 import { toast } from "react-toastify";
 
 const ExpenseForm = () => {

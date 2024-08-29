@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import FormContainer from "../components/FormContainer";
+import { useEffect, useRef } from "react";
+import FormContainer from "../components/UI/FormContainer";
 import { FaUserPlus } from "react-icons/fa";
 import {
   Button,
@@ -18,11 +18,11 @@ import { register, reset } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const usernameInputRef = useRef();
+  const phoneInputRef = useRef();
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
+  const confirmPasswordInputRef = useRef();
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -47,11 +47,24 @@ const Register = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    const enteredUsername = usernameInputRef.current.value;
+    const enteredEmail = emailInputRef.current.value;
+    const enteredPhone = phoneInputRef.current.value;
+    const enteredPassword = passwordInputRef.current.value;
+    const enteredConfirmPassword = confirmPasswordInputRef.current.value;
+
+    if (enteredPassword !== enteredConfirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-    dispatch(register({ username, email, phoneNumber, password }));
+    dispatch(
+      register({
+        username: enteredUsername,
+        email: enteredEmail,
+        phoneNumber: enteredPhone,
+        password: enteredPassword,
+      })
+    );
   };
 
   if (isLoading) {
@@ -74,8 +87,7 @@ const Register = () => {
           <FormControl
             type="text"
             placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            ref={usernameInputRef}
           />
         </FormGroup>
 
@@ -84,8 +96,7 @@ const Register = () => {
           <FormControl
             type="text"
             placeholder="Enter phone no"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            ref={phoneInputRef}
           />
         </FormGroup>
 
@@ -94,8 +105,7 @@ const Register = () => {
           <FormControl
             type="email"
             placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            ref={emailInputRef}
           />
         </FormGroup>
 
@@ -104,8 +114,7 @@ const Register = () => {
           <FormControl
             type="password"
             placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            ref={passwordInputRef}
           />
         </FormGroup>
 
@@ -114,8 +123,7 @@ const Register = () => {
           <FormControl
             type="password"
             placeholder="Confirm password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            ref={confirmPasswordInputRef}
           />
         </FormGroup>
 

@@ -17,7 +17,7 @@ import {
   deleteExpense,
   loadExpense,
   resetWithoutExpenses,
-} from "../features/expense/expenseSlice";
+} from "../../features/expense/expenseSlice";
 import { useEffect } from "react";
 
 const ExpenseItem = ({ expense }) => {

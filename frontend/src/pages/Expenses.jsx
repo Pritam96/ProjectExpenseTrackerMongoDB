@@ -1,6 +1,6 @@
-import ExpenseList from "../components/ExpenseList";
+import ExpenseList from "../components/expenses/ExpenseList";
 import { Col, Container, Row } from "react-bootstrap";
-import ExpenseForm from "../components/ExpenseForm";
+import ExpenseForm from "../components/expenses/ExpenseForm";
 
 const Expenses = () => {
   return (

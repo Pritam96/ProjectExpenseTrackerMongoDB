@@ -7,15 +7,15 @@ import {
   FormLabel,
   Spinner,
 } from "react-bootstrap";
-import FormContainer from "../components/FormContainer";
-import { useEffect, useState } from "react";
+import FormContainer from "../components/UI/FormContainer";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { forgotPassword, reset } from "../features/auth/authSlice";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("");
+  const emailInputRef = useRef();
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,7 +44,8 @@ const ForgotPassword = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(forgotPassword(email));
+    const enteredEmail = emailInputRef.current.value;
+    dispatch(forgotPassword(enteredEmail));
   };
 
   if (isLoading) {
@@ -64,8 +65,7 @@ const ForgotPassword = () => {
           <FormControl
             type="email"
             placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            ref={emailInputRef}
           />
         </FormGroup>
 

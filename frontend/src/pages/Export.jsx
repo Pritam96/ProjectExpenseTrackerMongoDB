@@ -6,9 +6,9 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
-import DateRangePicker from "../components/DateRangePicker";
+import DateRangePicker from "../components/UI/DateRangePicker";
 import { useEffect, useState } from "react";
-import PaginationComponent from "../components/PaginationComponent";
+import PaginationComponent from "../components/UI/PaginationComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   exportExpenses,
@@ -17,7 +17,7 @@ import {
   resetWithoutExpenses,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
-import ExpenseItemLite from "../components/ExpenseItemLite";
+import ExpenseItemLite from "../components/expenses/ExpenseItemLite";
 import moment from "moment";
 
 const Export = () => {
