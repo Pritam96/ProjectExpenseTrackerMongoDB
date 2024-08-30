@@ -6,11 +6,11 @@ const initialState = {
   count: 0,
   totalExpense: 0,
   pagination: {},
+  editExpenseData: {},
   isError: false,
   isSuccess: false,
   isLoading: false,
   isEditMode: false,
-  editExpenseData: {},
   message: "",
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Button,
   Container,
@@ -12,7 +12,6 @@ import {
   CardBody,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { getCategories } from "../../features/category/categorySlice";
 import {
   createExpense,
   editExpense,
@@ -20,23 +19,18 @@ import {
 } from "../../features/expense/expenseSlice";
 import { toast } from "react-toastify";
 
-const ExpenseForm = () => {
-  const [expenseId, setExpenseId] = useState("");
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
+const ExpenseForm = (props) => {
+  const [chosenCategory, setChosenCategory] = useState("");
+
+  const expenseIdInputRef = useRef();
+  const titleInputRef = useRef();
+  const amountInputRef = useRef();
+  const descriptionInputRef = useRef();
 
   const dispatch = useDispatch();
 
-  const { categories } = useSelector((state) => state.categories);
-
   const { isEditMode, editExpenseData, isError, message, totalExpense } =
     useSelector((state) => state.expenses);
-
-  useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
 
   useEffect(() => {
     if (isError) {
@@ -46,25 +40,32 @@ const ExpenseForm = () => {
 
   useEffect(() => {
     if (isEditMode && editExpenseData) {
-      setExpenseId(editExpenseData._id);
-      setTitle(editExpenseData.title);
-      setAmount(editExpenseData.amount);
-      setDescription(editExpenseData.description || "");
-      setCategory(editExpenseData.categoryId);
+      expenseIdInputRef.current.value = editExpenseData._id;
+      titleInputRef.current.value = editExpenseData.title;
+      amountInputRef.current.value = editExpenseData.amount;
+      descriptionInputRef.current.value = editExpenseData.description || "";
+
+      setChosenCategory(editExpenseData.categoryId);
     }
   }, [isEditMode]);
 
   const formHandler = (e) => {
     e.preventDefault();
+
+    const existingExpenseId = expenseIdInputRef.current.value || null;
+    const enteredTitle = titleInputRef.current.value;
+    const enteredAmount = amountInputRef.current.value;
+    const enteredDescription = descriptionInputRef.current.value;
+
     if (isEditMode) {
       dispatch(
         editExpense({
-          expenseId: expenseId,
+          expenseId: existingExpenseId,
           expenseData: {
-            title,
-            amount,
-            category,
-            description,
+            title: enteredTitle,
+            amount: enteredAmount,
+            category: chosenCategory,
+            description: enteredDescription,
           },
         })
       ).then(() => {
@@ -74,10 +75,10 @@ const ExpenseForm = () => {
       });
     } else {
       const expenseData = {
-        title,
-        amount,
-        category,
-        description,
+        title: enteredTitle,
+        amount: enteredAmount,
+        category: chosenCategory,
+        description: enteredDescription,
       };
       dispatch(createExpense(expenseData)).then(() => {
         toast.success("Expense Added");
@@ -88,11 +89,11 @@ const ExpenseForm = () => {
   };
 
   const resetForm = () => {
-    setExpenseId("");
-    setTitle("");
-    setAmount("");
-    setDescription("");
-    setCategory("");
+    expenseIdInputRef.current.value = "";
+    titleInputRef.current.value = "";
+    amountInputRef.current.value = "";
+    descriptionInputRef.current.value = "";
+    setChosenCategory("");
   };
 
   return (
@@ -110,13 +111,13 @@ const ExpenseForm = () => {
         </Card>
       ) : null}
       <Form onSubmit={formHandler}>
+        <input type="hidden" ref={expenseIdInputRef} />
         <FormGroup className="my-3" controlId="title">
           <FormLabel className="h5">Title</FormLabel>
           <FormControl
             type="text"
             placeholder="Enter title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            ref={titleInputRef}
           />
         </FormGroup>
 
@@ -125,22 +126,21 @@ const ExpenseForm = () => {
           <FormControl
             type="number"
             placeholder="Enter amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            ref={amountInputRef}
           />
         </FormGroup>
 
         <FormGroup className="my-3" controlId="category">
           <FormLabel className="h5">Category</FormLabel>
           <FormSelect
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={chosenCategory}
+            onChange={(e) => setChosenCategory(e.target.value)}
           >
             <option value="" disabled>
               Select a category
             </option>
-            {categories &&
-              categories.map((categoryItem) => (
+            {props.categoryList &&
+              props.categoryList.map((categoryItem) => (
                 <option value={categoryItem._id} key={categoryItem._id}>
                   {categoryItem.title}
                 </option>
@@ -153,8 +153,7 @@ const ExpenseForm = () => {
           <FormControl
             type="text"
             placeholder="Enter description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            ref={descriptionInputRef}
           />
         </FormGroup>
 
