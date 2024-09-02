@@ -7,14 +7,13 @@ import {
   Spinner,
 } from "react-bootstrap";
 import DateRangePicker from "../components/UI/DateRangePicker";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PaginationComponent from "../components/UI/PaginationComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
   exportExpenses,
   getExpenses,
   resetToInitialState,
-  resetWithoutExpenses,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
 import ExpenseItemLite from "../components/expenses/ExpenseItemLite";
@@ -28,6 +27,13 @@ const Export = () => {
   const dispatch = useDispatch();
   const { expenses, count, isError, isLoading, message, pagination } =
     useSelector((state) => state.expenses);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+      dispatch(resetToInitialState());
+    }
+  }, [isError, message, dispatch]);
 
   useEffect(() => {
     dispatch(resetToInitialState());
@@ -45,33 +51,25 @@ const Export = () => {
         })
       );
     }
-
-    return () => {
-      dispatch(resetWithoutExpenses());
-    };
   }, [startDate, endDate, dispatch, limit, pagination.current]);
 
-  useEffect(() => {
-    if (isError) {
-      toast.error(message);
-      dispatch(resetToInitialState());
-    }
-  }, [isError, message, dispatch]);
-
-  const handlePageChange = (page) => {
-    dispatch(
-      getExpenses({
-        dateRange: {
-          start: moment(startDate).toISOString(),
-          end: moment(endDate).toISOString(),
-        },
-        pagination: {
-          page: page,
-          limit: parseInt(limit, 10),
-        },
-      })
-    );
-  };
+  const handlePageChange = useCallback(
+    (page) => {
+      dispatch(
+        getExpenses({
+          dateRange: {
+            start: moment(startDate).toISOString(),
+            end: moment(endDate).toISOString(),
+          },
+          pagination: {
+            page: page,
+            limit: parseInt(limit, 10),
+          },
+        })
+      );
+    },
+    [dispatch, startDate, endDate, limit]
+  );
 
   const downloadHandler = () => {
     dispatch(
@@ -80,7 +78,6 @@ const Export = () => {
         end: moment(endDate).toISOString(),
       })
     );
-    dispatch(resetWithoutExpenses());
   };
 
   return (

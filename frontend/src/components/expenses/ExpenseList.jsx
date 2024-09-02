@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getExpenses,
-  resetToInitialState,
-  resetWithoutExpenses,
-} from "../../features/expense/expenseSlice";
+import { getExpenses } from "../../features/expense/expenseSlice";
 import ExpenseItem from "./ExpenseItem";
 import { Col, Container, FormSelect, Row, Spinner } from "react-bootstrap";
-import { toast } from "react-toastify";
 import PaginationComponent from "../UI/PaginationComponent";
 import moment from "moment";
 
@@ -32,49 +27,33 @@ const dateRanges = {
 
 const ExpenseList = () => {
   const [type, setType] = useState("daily");
-
   const dispatch = useDispatch();
-  const { expenses, count, isError, isLoading, message, pagination } =
-    useSelector((state) => state.expenses);
+  const { expenses, count, isLoading, pagination } = useSelector(
+    (state) => state.expenses
+  );
 
   useEffect(() => {
-    dispatch(resetToInitialState());
-    fetchExpenses();
-    return () => {
-      dispatch(resetWithoutExpenses());
-    };
-  }, [type]);
-
-  useEffect(() => {
-    if (isError) {
-      toast.error(message);
-      dispatch(resetToInitialState());
-    }
-  }, [isError, message, dispatch]);
-
-  const fetchExpenses = () => {
     dispatch(
       getExpenses({
         dateRange: { start: dateRanges[type].start, end: dateRanges[type].end },
         pagination: { page: 1, limit: pagination?.next?.limit || 4 },
       })
-    ).finally(() => {
-      dispatch(resetWithoutExpenses());
-    });
-  };
+    );
+  }, [type, dispatch]);
 
   const handlePageChange = (page) => {
     dispatch(
       getExpenses({
-        dateRange: { start: dateRanges[type].start, end: dateRanges[type].end },
+        dateRange: {
+          start: dateRanges[type].start,
+          end: dateRanges[type].end,
+        },
         pagination: {
-          page: page,
+          page: page || 1,
           limit: pagination?.next?.limit || 4,
         },
       })
-    ).finally(() => {
-      dispatch(resetWithoutExpenses());
-    });
+    );
   };
 
   return (

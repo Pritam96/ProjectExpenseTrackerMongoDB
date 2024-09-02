@@ -1,14 +1,4 @@
-import {
-  Button,
-  Col,
-  Container,
-  Form,
-  FormControl,
-  FormGroup,
-  FormLabel,
-  Row,
-  Spinner,
-} from "react-bootstrap";
+import { Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { FaSignInAlt } from "react-icons/fa";
 import FormContainer from "../components/UI/FormContainer";
@@ -16,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, reset } from "../features/auth/authSlice";
+import Input from "../components/UI/Input";
 
 const Login = () => {
   const emailInputRef = useRef();
@@ -64,23 +55,21 @@ const Login = () => {
         Log In
       </h3>
       <Form onSubmit={submitHandler}>
-        <FormGroup className="my-2" controlId="email">
-          <FormLabel>Email Address</FormLabel>
-          <FormControl
-            type="email"
-            placeholder="Enter email"
-            ref={emailInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="emailInput"
+          type="email"
+          label="Email address"
+          placeholder="Enter email"
+          ref={emailInputRef}
+        />
 
-        <FormGroup className="my-2" controlId="password">
-          <FormLabel>Password</FormLabel>
-          <FormControl
-            type="password"
-            placeholder="Enter password"
-            ref={passwordInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="passwordInput"
+          type="password"
+          label="Password"
+          placeholder="Enter password"
+          ref={passwordInputRef}
+        />
 
         <Button
           type="submit"

@@ -10,33 +10,17 @@ import {
   Row,
 } from "react-bootstrap";
 import moment from "moment";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import {
-  resetToInitialState,
-  deleteExpense,
-  resetWithoutExpenses,
-} from "../../features/expense/expenseSlice";
-import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { deleteExpense } from "../../features/expense/expenseSlice";
+import { useState } from "react";
 
 const ExpenseItem = ({ expense }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const dispatch = useDispatch();
-  const { isError, message } = useSelector((state) => state.expenses);
-
-  useEffect(() => {
-    if (isError) {
-      toast.error(message);
-      dispatch(resetToInitialState());
-    }
-  }, [isError, message, dispatch]);
 
   const deleteHandler = () => {
-    dispatch(deleteExpense(expense._id)).then(() => {
-      toast.success("Expense Deleted");
-      dispatch(resetWithoutExpenses());
-    });
+    dispatch(deleteExpense(expense._id));
   };
 
   const cardClickHandler = () => {

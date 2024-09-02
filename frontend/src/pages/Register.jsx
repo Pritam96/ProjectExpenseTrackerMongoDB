@@ -1,21 +1,12 @@
 import { useEffect, useRef } from "react";
 import FormContainer from "../components/UI/FormContainer";
 import { FaUserPlus } from "react-icons/fa";
-import {
-  Button,
-  Col,
-  Container,
-  Form,
-  FormControl,
-  FormGroup,
-  FormLabel,
-  Row,
-  Spinner,
-} from "react-bootstrap";
+import { Button, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { register, reset } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
+import Input from "../components/UI/Input";
 
 const Register = () => {
   const usernameInputRef = useRef();
@@ -82,50 +73,43 @@ const Register = () => {
         Register
       </h3>
       <Form onSubmit={submitHandler}>
-        <FormGroup className="my-2" controlId="name">
-          <FormLabel>Username</FormLabel>
-          <FormControl
-            type="text"
-            placeholder="Enter username"
-            ref={usernameInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="usernameInput"
+          label="Username"
+          placeholder="Enter username"
+          ref={usernameInputRef}
+        />
 
-        <FormGroup className="my-2" controlId="phone">
-          <FormLabel>Phone No</FormLabel>
-          <FormControl
-            type="text"
-            placeholder="Enter phone no"
-            ref={phoneInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="phoneInput"
+          label="Phone No"
+          placeholder="Enter phone no"
+          ref={phoneInputRef}
+        />
 
-        <FormGroup className="my-2" controlId="email">
-          <FormLabel>Email Address</FormLabel>
-          <FormControl
-            type="email"
-            placeholder="Enter email"
-            ref={emailInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="emailInput"
+          type="email"
+          label="Email address"
+          placeholder="Enter email"
+          ref={emailInputRef}
+        />
 
-        <FormGroup className="my-2" controlId="password">
-          <FormLabel>Password</FormLabel>
-          <FormControl
-            type="password"
-            placeholder="Enter password"
-            ref={passwordInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="passwordInput"
+          type="password"
+          label="Password"
+          placeholder="Enter password"
+          ref={passwordInputRef}
+        />
 
-        <FormGroup className="my-2" controlId="confirm-password">
-          <FormLabel>Confirm password</FormLabel>
-          <FormControl
-            type="password"
-            placeholder="Confirm password"
-            ref={confirmPasswordInputRef}
-          />
-        </FormGroup>
+        <Input
+          id="confirmPasswordInput"
+          type="password"
+          label="Confirm password"
+          placeholder="Confirm password"
+          ref={confirmPasswordInputRef}
+        />
 
         <Button type="submit" variant="primary" className="mt-3">
           Register

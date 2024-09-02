@@ -3,22 +3,34 @@ import { Col, Container, Row } from "react-bootstrap";
 import ExpenseForm from "../components/expenses/ExpenseForm";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { getCategories } from "../features/category/categorySlice";
+import { toast } from "react-toastify";
+import { resetToInitialState } from "../features/expense/expenseSlice";
 
 const Expenses = () => {
   const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.categories);
+  const { isSuccess, isError, message } = useSelector(
+    (state) => state.expenses
+  );
+
+  console.log("EXPENSE PAGE RELOADED!");
 
   useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
+    if (isSuccess) {
+      toast.success(message);
+      dispatch(resetToInitialState());
+    }
+    if (isError) {
+      toast.error(message);
+      dispatch(resetToInitialState());
+    }
+  }, [isSuccess, isError, message, dispatch]);
 
   return (
     <>
       <Container>
         <Row>
           <Col md={4} className="mt-4">
-            <ExpenseForm categoryList={categories} />
+            <ExpenseForm />
           </Col>
           <Col md={8}>
             <ExpenseList />
