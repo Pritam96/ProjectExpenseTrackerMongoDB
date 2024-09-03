@@ -14,20 +14,19 @@ const ExpenseForm = () => {
   const amountInputRef = useRef();
   const categoryInputRef = useRef();
   const descriptionInputRef = useRef();
+
   const dispatch = useDispatch();
-  const { isEditMode, editExpenseData, totalExpenses } = useSelector(
-    (state) => state.expenses
-  );
+  const { editData, history } = useSelector((state) => state.expenses);
 
   useEffect(() => {
-    if (isEditMode) {
-      expenseIdInputRef.current.value = editExpenseData._id;
-      titleInputRef.current.value = editExpenseData.title;
-      amountInputRef.current.value = editExpenseData.amount;
-      categoryInputRef.current.value = editExpenseData.categoryId;
-      descriptionInputRef.current.value = editExpenseData.description || "";
+    if (editData) {
+      expenseIdInputRef.current.value = editData._id;
+      titleInputRef.current.value = editData.title;
+      amountInputRef.current.value = editData.amount;
+      categoryInputRef.current.value = editData.categoryId;
+      descriptionInputRef.current.value = editData.description || "";
     }
-  }, [isEditMode, editExpenseData]);
+  }, [editData]);
 
   const formHandler = (e) => {
     e.preventDefault();
@@ -38,7 +37,7 @@ const ExpenseForm = () => {
     const chosenCategory = categoryInputRef.current.value;
     const enteredDescription = descriptionInputRef.current.value;
 
-    if (isEditMode) {
+    if (editData) {
       dispatch(
         editExpense({
           expenseId: existingExpenseId,
@@ -70,23 +69,31 @@ const ExpenseForm = () => {
     descriptionInputRef.current.value = "";
   };
 
+  let historyContent =  
+    Object.keys(history).length !== 0 ? (
+      <Card className="text-start">
+        <CardBody className="flex-column">
+          <h2>Expenses</h2>
+          {history.previousDay.total !== 0 && (
+            <Col className="m-3">
+              <h5>Previous day: ₹{history.previousDay.total}</h5>
+            </Col>
+          )}
+          <Col className="m-3">
+            <h5>Today: ₹{history.today.total}</h5>
+          </Col>
+          <Col className="m-3">
+            <h5>All-Total: ₹{history.total}</h5>
+          </Col>
+        </CardBody>
+      </Card>
+    ) : null;
+
   return (
     <Container fluid>
-      {totalExpenses ? (
-        <Card className="text-end">
-          <CardBody className="flex-column">
-            <Col className="m-3">
-              <h3>Total Expenses:</h3>
-            </Col>
-            <Col className="m-3">
-              <h2>₹{totalExpenses}</h2>
-            </Col>
-          </CardBody>
-        </Card>
-      ) : null}
+      {historyContent}
       <Form onSubmit={formHandler}>
         <Input id="expenseIdInput" type="hidden" ref={expenseIdInputRef} />
-
         <Input
           id="titleInput"
           label="Title"

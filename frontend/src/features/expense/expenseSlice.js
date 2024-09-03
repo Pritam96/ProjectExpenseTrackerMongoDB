@@ -5,9 +5,10 @@ const initialState = {
   expenses: [],
   pagination: {},
   count: 0,
-  isEditMode: false,
-  totalExpenses: 0,
-  editExpenseData: {},
+
+  editData: null,
+
+  history: {},
 
   isError: false,
   isSuccess: false,
@@ -132,6 +133,7 @@ const expenseSlice = createSlice({
       state.isLoading = false;
       state.message = "";
     },
+    resetForExport: () => initialState,
   },
   extraReducers: (builder) => {
     builder
@@ -143,9 +145,10 @@ const expenseSlice = createSlice({
         state.isSuccess = true;
         state.message = "Expense added successfully";
 
-        state.expenses.unshift(action.payload);
-        state.totalExpenses += action.payload.amount;
+        state.expenses.unshift(action.payload.expense);
         state.count += 1;
+
+        state.history = action.payload.history;
       })
       .addCase(createExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -161,10 +164,11 @@ const expenseSlice = createSlice({
         state.isSuccess = true;
         state.message = "Expenses fetched successfully";
 
-        state.count = action.payload.count;
-        state.totalExpenses = action.payload.totalAmount;
         state.expenses = action.payload.expenses;
         state.pagination = action.payload.pagination;
+        state.count = action.payload.count;
+
+        state.history = action.payload.history;
       })
       .addCase(getExpenses.rejected, (state, action) => {
         state.isLoading = false;
@@ -180,16 +184,15 @@ const expenseSlice = createSlice({
         state.isSuccess = true;
         state.message = "Expense updated successfully";
 
-        state.isEditMode = false;
-        state.editExpenseData = {};
-        const existingExpense = state.expenses.find(
-          (expense) => expense._id === action.payload._id
+        state.editData = null;
+
+        state.expenses.map((expense) =>
+          expense._id === action.payload.expense._id
+            ? action.payload.expense
+            : expense
         );
-        const amountDifference = action.payload.amount - existingExpense.amount;
-        state.expenses = state.expenses.map((expense) =>
-          expense._id === action.payload._id ? action.payload : expense
-        );
-        state.totalExpenses += amountDifference;
+
+        state.history = action.payload.history;
       })
       .addCase(editExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -205,14 +208,11 @@ const expenseSlice = createSlice({
         state.isSuccess = true;
         state.message = "Expense deleted successfully";
 
-        const deletedExpense = state.expenses.find(
-          (expense) => expense._id === action.payload._id
-        );
         state.expenses = state.expenses.filter(
-          (expense) => expense._id !== action.payload._id
+          (expense) => expense._id !== action.payload.deleted_id
         );
-        state.totalExpenses -= deletedExpense.amount;
         state.count -= 1;
+        state.history = action.payload.history;
       })
       .addCase(deleteExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -221,8 +221,7 @@ const expenseSlice = createSlice({
       })
 
       .addCase(loadExpense.fulfilled, (state, action) => {
-        state.isEditMode = true;
-        state.editExpenseData = action.payload;
+        state.editData = { ...action.payload };
       })
 
       .addCase(exportExpenses.pending, (state) => {
@@ -241,5 +240,5 @@ const expenseSlice = createSlice({
   },
 });
 
-export const { resetToInitialState } = expenseSlice.actions;
+export const { resetToInitialState, resetForExport } = expenseSlice.actions;
 export default expenseSlice.reducer;

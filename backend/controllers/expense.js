@@ -3,7 +3,21 @@ const Expense = require("../models/Expense");
 const Category = require("../models/Category");
 const { Parser } = require("json2csv");
 const moment = require("moment");
-const TotalExpense = require("../models/TotalExpense");
+const History = require("../models/History");
+
+const getHistoryData = async (userId) => {
+  const historyData = await History.findOne({
+    user: userId,
+  });
+  return {
+    total: historyData.total,
+    previousDay: historyData.previousDayTotal,
+    today: historyData.todayTotal,
+    weekly: historyData.weeklyTotals,
+    monthly: historyData.monthlyTotals,
+    yearly: historyData.yearlyTotals,
+  };
+};
 
 exports.postExpense = asyncHandler(async (req, res, next) => {
   const { title, amount, category, description } = req.body;
@@ -19,15 +33,20 @@ exports.postExpense = asyncHandler(async (req, res, next) => {
   const expense = await Expense.create(enteredData);
   const categoryDocument = await Category.findById(expense.category);
 
+  const historyData = await getHistoryData(req.user._id);
+
   res.status(201).json({
-    _id: expense._id,
-    title: expense.title,
-    categoryId: expense.category,
-    category: categoryDocument.title,
-    amount: expense.amount,
-    description: expense.description,
-    createdAt: expense.createdAt,
-    updatedAt: expense.updatedAt,
+    expense: {
+      _id: expense._id,
+      title: expense.title,
+      categoryId: expense.category,
+      category: categoryDocument.title,
+      amount: expense.amount,
+      description: expense.description,
+      createdAt: expense.createdAt,
+      updatedAt: expense.updatedAt,
+    },
+    history: historyData,
   });
 });
 
@@ -56,9 +75,7 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
     })
     .sort({ createdAt: -1 });
 
-  const totalExpenseData = await TotalExpense.findOne({
-    user: req.user._id,
-  });
+  const historyData = await getHistoryData(req.user._id);
 
   const transformedExpenses = expenses.map((expense) => ({
     _id: expense._id,
@@ -92,10 +109,10 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
+    expenses: transformedExpenses,
     pagination,
     count: total,
-    totalAmount: totalExpenseData?.totalAmount || 0,
-    expenses: transformedExpenses,
+    history: historyData,
   });
 });
 
@@ -120,16 +137,20 @@ exports.putEditExpense = asyncHandler(async (req, res, next) => {
   }
 
   const categoryDocument = await Category.findById(category);
+  const historyData = await getHistoryData(req.user._id);
 
   res.status(201).json({
-    _id: expense._id,
-    title: expense.title,
-    categoryId: expense.category,
-    category: categoryDocument.title,
-    amount: expense.amount,
-    description: expense.description,
-    createdAt: expense.createdAt,
-    updatedAt: expense.updatedAt,
+    expense: {
+      _id: expense._id,
+      title: expense.title,
+      categoryId: expense.category,
+      category: categoryDocument.title,
+      amount: expense.amount,
+      description: expense.description,
+      createdAt: expense.createdAt,
+      updatedAt: expense.updatedAt,
+    },
+    history: historyData,
   });
 });
 
@@ -140,7 +161,13 @@ exports.deleteExpense = asyncHandler(async (req, res, next) => {
     res.status(404);
     throw new Error("Expense not found");
   }
-  res.status(200).json({ _id: expense._id });
+
+  const historyData = await getHistoryData(req.user._id);
+
+  res.status(200).json({
+    deleted_id: expense._id,
+    history: historyData,
+  });
 });
 
 exports.downloadCsv = asyncHandler(async (req, res, next) => {

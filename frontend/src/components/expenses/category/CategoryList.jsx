@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../../features/category/categorySlice";
 import Select from "../../UI/Select";
@@ -6,11 +6,19 @@ import Select from "../../UI/Select";
 const CategoryList = forwardRef((props, ref) => {
   const dispatch = useDispatch();
 
-  const { categories } = useSelector((state) => state.categories);
+  const { categories, isLoading } = useSelector((state) => state.categories);
 
   useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
+    if (!categories || categories.length === 0) {
+      dispatch(getCategories());
+    }
+  }, [categories, dispatch]);
+
+  // Category list always remain same
+  // Memoize categories to avoid unnecessary recalculations
+  const memoizedCategories = useMemo(() => {
+    return categories || [];
+  }, [categories]);
 
   return (
     <Select
@@ -19,9 +27,10 @@ const CategoryList = forwardRef((props, ref) => {
       placeholder="Select a category"
       ref={ref}
       defaultValue=""
-      options={categories}
+      options={memoizedCategories}
       valueKey="_id"
       labelKey="title"
+      disabled={isLoading}
     />
   );
 });

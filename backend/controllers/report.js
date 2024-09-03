@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const TotalExpense = require("../models/TotalExpense");
+const History = require("../models/History");
 
 const transFormEmail = (email) => {
   const [localPart, domain] = email.split("@");
@@ -26,7 +26,7 @@ const transformPhoneNumber = (phoneNumber) => {
 };
 
 exports.getLeaderBoard = asyncHandler(async (req, res, next) => {
-  const topUsersByExpenses = await TotalExpense.find()
+  const topUsersByExpenses = await History.find()
     .populate({
       path: "user",
       select: "username email phoneNumber",
@@ -47,7 +47,7 @@ exports.getLeaderBoard = asyncHandler(async (req, res, next) => {
           ? transformPhoneNumber(user.user.phoneNumber)
           : user.user.phoneNumber,
       position: index + 1,
-      totalAmount: user.totalAmount,
+      totalAmount: user.total,
     };
   });
 

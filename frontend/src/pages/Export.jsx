@@ -1,5 +1,7 @@
 import {
   Button,
+  Card,
+  CardBody,
   Col,
   Container,
   FormSelect,
@@ -13,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   exportExpenses,
   getExpenses,
+  resetForExport,
   resetToInitialState,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
@@ -36,7 +39,7 @@ const Export = () => {
   }, [isError, message, dispatch]);
 
   useEffect(() => {
-    dispatch(resetToInitialState());
+    dispatch(resetForExport());
     if (startDate && endDate) {
       dispatch(
         getExpenses({
