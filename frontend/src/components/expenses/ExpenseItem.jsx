@@ -31,7 +31,7 @@ const ExpenseItem = ({ expense }) => {
     <Card className="mt-3 shadow">
       <CardBody>
         <Row>
-          <Col xs={3} className="d-flex align-items-center">
+          <Col xs={3} className="d-flex align-items">
             <CardTitle>
               <h3>₹{expense.amount}</h3>
             </CardTitle>

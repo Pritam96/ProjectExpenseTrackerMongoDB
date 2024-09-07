@@ -34,5 +34,27 @@ const resetPassword = async (token, password) => {
   return response.data;
 };
 
-const authService = { register, login, logout, forgotPassword, resetPassword };
+const setPremiumUser = async (token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const response = await axios.post(`${API_URL}/setPremium`, {}, config);
+
+  if (response.data) {
+    localStorage.setItem("user", JSON.stringify(response.data));
+  }
+  return response.data;
+};
+
+const authService = {
+  register,
+  login,
+  logout,
+  forgotPassword,
+  resetPassword,
+  setPremiumUser,
+};
 export default authService;

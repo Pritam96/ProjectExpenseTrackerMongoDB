@@ -3,7 +3,6 @@ const crypto = require("crypto");
 const razorpay = require("razorpay");
 const shortid = require("shortid");
 const Payment = require("../models/Payment");
-const User = require("../models/User");
 
 const instance = new razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -29,24 +28,16 @@ exports.postOrderCreate = asyncHandler(async (req, res, next) => {
 
   // Saving payment information
   await Payment.create({
+    ...order,
     user: req.user._id,
     order_id: order.id,
+  });
+
+  res.status(200).json({
     ...order,
-  });
-
-  res.status(200).json({
-    username: req.user.username,
+    name: req.user.username,
     email: req.user.email,
-    phone: req.user.phone,
-    order_id: order.id,
-    amount: order.amount,
-  });
-});
-
-// Get payment id
-exports.getKey = asyncHandler(async (req, res, next) => {
-  res.status(200).json({
-    razorpay_key_id: process.env.RAZORPAY_KEY_ID,
+    contact: req.user.phone,
   });
 });
 
@@ -71,6 +62,11 @@ exports.postPaymentVerify = asyncHandler(async (req, res, next) => {
 
   const payment = await Payment.findOne({ order_id: razorpay_order_id });
 
+  if (!payment) {
+    return res.status(404).json({ message: "Payment not found." });
+  }
+
+  // Update payment details
   payment.payment_id = razorpay_payment_id;
   payment.payment_signature = razorpay_signature;
   payment.amount_due = 0;
@@ -78,10 +74,11 @@ exports.postPaymentVerify = asyncHandler(async (req, res, next) => {
   payment.status = "paid";
   await payment.save();
 
-  // Update user
-  await User.findByIdAndUpdate(payment.user, { isPremium: true });
-
-  res
-    .status(200)
-    .json({ message: "Payment successful", reference_no: payment.order_id });
+  res.status(200).json({
+    payment_id: razorpay_payment_id,
+    payment_signature: razorpay_signature,
+    amount_due: 0,
+    amount_paid: payment.amount,
+    status: "paid",
+  });
 });

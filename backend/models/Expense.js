@@ -80,8 +80,7 @@ async function updateHistoryTotals(userId, amount) {
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1;
     const currentWeek = getWeekNumber(currentDate);
-    // const currentDay = currentDate.getDate();
-    const currentDay = 4;
+    const currentDay = currentDate.getDate();
 
     // Retrieve or create the user's history document
     let history = await History.findOne({ user: userId });
@@ -90,8 +89,8 @@ async function updateHistoryTotals(userId, amount) {
       history = new History({ user: userId });
     }
 
-    // Update total amounts
-    history.total += amount;
+    // Update total amounts, ensuring it doesn't go negative
+    history.total = Math.max(0, history.total + amount);
 
     // Update yearly totals
     await updateNestedTotal(
@@ -123,8 +122,8 @@ async function updateHistoryTotals(userId, amount) {
       history.todayTotal.month === currentMonth &&
       history.todayTotal.day === currentDay
     ) {
-      // Update today's total if it's the same day
-      history.todayTotal.total += amount;
+      // Update today's total if it's the same day, ensuring it doesn't go negative
+      history.todayTotal.total = Math.max(0, history.todayTotal.total + amount);
     } else {
       // If it's a new day, move today's total to previousDayTotal
       history.previousDayTotal = { ...history.todayTotal };
@@ -134,7 +133,7 @@ async function updateHistoryTotals(userId, amount) {
         year: currentYear,
         month: currentMonth,
         day: currentDay,
-        total: amount,
+        total: Math.max(0, amount),
       };
     }
 
@@ -166,10 +165,10 @@ async function updateNestedTotal(history, key, matchFields, amount) {
   });
 
   if (index !== -1) {
-    // If the entry exists, increment the total
-    history[key][index].total += amount;
-  } else {
-    // If the entry does not exist, add a new one
+    // If the entry exists, increment the total, ensuring it doesn't go negative
+    history[key][index].total = Math.max(0, history[key][index].total + amount);
+  } else if (amount > 0) {
+    // If the entry does not exist and amount is positive, add a new one
     history[key].push({ ...matchFields, total: amount });
   }
 }

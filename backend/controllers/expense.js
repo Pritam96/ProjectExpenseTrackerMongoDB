@@ -6,24 +6,31 @@ const moment = require("moment");
 const History = require("../models/History");
 
 const getHistoryData = async (userId) => {
-  const historyData = await History.findOne({
-    user: userId,
-  });
-  return {
-    total: historyData.total,
-    previousDay: historyData.previousDayTotal,
-    today: historyData.todayTotal,
-    weekly: historyData.weeklyTotals,
-    monthly: historyData.monthlyTotals,
-    yearly: historyData.yearlyTotals,
-  };
+  try {
+    const historyData = await History.findOne({
+      user: userId,
+    });
+    if (!historyData) return {};
+    return {
+      total: historyData.total,
+      previousDay: historyData.previousDayTotal,
+      today: historyData.todayTotal,
+      weekly: historyData.weeklyTotals,
+      monthly: historyData.monthlyTotals,
+      yearly: historyData.yearlyTotals,
+    };
+  } catch (error) {
+    console.error(error);
+    return {};
+  }
 };
 
 exports.postExpense = asyncHandler(async (req, res, next) => {
   const { title, amount, category, description } = req.body;
+  const userId = req.user._id;
 
   const enteredData = {
-    user: req.user._id,
+    user: userId,
     title,
     amount,
     category,
@@ -33,7 +40,7 @@ exports.postExpense = asyncHandler(async (req, res, next) => {
   const expense = await Expense.create(enteredData);
   const categoryDocument = await Category.findById(expense.category);
 
-  const historyData = await getHistoryData(req.user._id);
+  const historyData = await getHistoryData(userId);
 
   res.status(201).json({
     expense: {
@@ -55,11 +62,12 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit, 10) || 4;
   const start = req.query.start ? new Date(req.query.start) : null;
   const end = req.query.end ? new Date(req.query.end) : null;
-
   const startIndex = (page - 1) * limit;
 
+  const userId = req.user._id;
+
   // Build the base query
-  const query = { user: req.user._id };
+  const query = { user: userId };
   if (start && end) {
     query.createdAt = { $gte: start, $lte: end };
   }
@@ -75,7 +83,7 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
     })
     .sort({ createdAt: -1 });
 
-  const historyData = await getHistoryData(req.user._id);
+  const historyData = await getHistoryData(userId);
 
   const transformedExpenses = expenses.map((expense) => ({
     _id: expense._id,
@@ -92,21 +100,10 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   const pagination = {
     totalPages: Math.ceil(total / limit),
     currentPage: page,
+    next: startIndex + limit < total ? page + 1 : undefined,
+    prev: startIndex > 0 ? page - 1 : undefined,
+    limit,
   };
-
-  if (startIndex + limit < total) {
-    pagination.next = {
-      page: page + 1,
-      limit,
-    };
-  }
-
-  if (startIndex > 0) {
-    pagination.prev = {
-      page: page - 1,
-      limit,
-    };
-  }
 
   res.status(200).json({
     expenses: transformedExpenses,
@@ -119,6 +116,7 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
 exports.putEditExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
   const { title, category, amount, description } = req.body;
+  const userId = req.user._id;
 
   const enteredData = {
     title,
@@ -137,7 +135,7 @@ exports.putEditExpense = asyncHandler(async (req, res, next) => {
   }
 
   const categoryDocument = await Category.findById(category);
-  const historyData = await getHistoryData(req.user._id);
+  const historyData = await getHistoryData(userId);
 
   res.status(201).json({
     expense: {
@@ -156,13 +154,15 @@ exports.putEditExpense = asyncHandler(async (req, res, next) => {
 
 exports.deleteExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
+  const userId = req.user._id;
+
   const expense = await Expense.findByIdAndDelete(expenseId);
   if (!expense) {
     res.status(404);
     throw new Error("Expense not found");
   }
 
-  const historyData = await getHistoryData(req.user._id);
+  const historyData = await getHistoryData(userId);
 
   res.status(200).json({
     deleted_id: expense._id,
@@ -172,6 +172,7 @@ exports.deleteExpense = asyncHandler(async (req, res, next) => {
 
 exports.downloadCsv = asyncHandler(async (req, res, next) => {
   const { start, end } = req.query;
+  const userId = req.user._id;
 
   if (!start || !end) {
     res.status(400);
@@ -189,7 +190,7 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
   }
 
   const expenses = await Expense.find({
-    user: req.user._id,
+    user: userId,
     createdAt: {
       $gte: new Date(start),
       $lte: new Date(end),
@@ -202,7 +203,7 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
   const totalExpenseData = await Expense.aggregate([
     {
       $match: {
-        user: req.user._id,
+        user: userId,
         createdAt: { $gte: new Date(start), $lte: new Date(end) },
       },
     },

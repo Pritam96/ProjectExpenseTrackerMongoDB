@@ -1,5 +1,13 @@
 import { useEffect, useRef } from "react";
-import { Button, Container, Form, Col, Card, CardBody } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Form,
+  Col,
+  Card,
+  CardBody,
+  Row,
+} from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createExpense,
@@ -69,21 +77,34 @@ const ExpenseForm = () => {
     descriptionInputRef.current.value = "";
   };
 
-  let historyContent =  
-    Object.keys(history).length !== 0 ? (
-      <Card className="text-start">
+  let historyContent =
+    history && Object.keys(history).length !== 0 ? (
+      <Card className="text-start items-cen">
         <CardBody className="flex-column">
-          <h2>Expenses</h2>
-          {history.previousDay.total !== 0 && (
-            <Col className="m-3">
-              <h5>Previous day: ₹{history.previousDay.total}</h5>
-            </Col>
-          )}
-          <Col className="m-3">
-            <h5>Today: ₹{history.today.total}</h5>
-          </Col>
-          <Col className="m-3">
-            <h5>All-Total: ₹{history.total}</h5>
+          <h3>Expenses</h3>
+          <Col className="mt-3">
+            {history?.previousDay.total !== 0 && (
+              <Row>
+                <Col className="h5">Previous Day:</Col>
+                <Col className="h5 text-center text-secondary">
+                  ₹{history.previousDay.total}
+                </Col>
+              </Row>
+            )}
+            {history?.today.total !== 0 && (
+              <Row>
+                <Col className="h5 text-muted">Today:</Col>
+                <Col className="h5 text-center text-danger">
+                  ₹{history.today.total}
+                </Col>
+              </Row>
+            )}
+            {history?.total !== 0 && (
+              <Row>
+                <Col className="h5 text-muted">All-total:</Col>
+                <Col className="h5 text-center">₹{history.total}</Col>
+              </Row>
+            )}
           </Col>
         </CardBody>
       </Card>

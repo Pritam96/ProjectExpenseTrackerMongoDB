@@ -3,24 +3,38 @@ import expenseService from "./expenseService";
 
 const initialState = {
   expenses: [],
-  pagination: {},
+  pagination: {
+    totalPages: null,
+    currentPage: 1,
+    next: null,
+    prev: null,
+    limit: 4,
+  },
   count: 0,
-
   editData: null,
-
   history: {},
-
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: "",
 };
 
+const addExpenseToList = (expenses, newExpense, limit) => {
+  const newArray = [newExpense, ...expenses];
+  if (newArray.length > limit) {
+    newArray.pop();
+  }
+  return newArray;
+};
+
 export const createExpense = createAsyncThunk(
   "expense/create",
   async (expenseData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        return thunkAPI.rejectWithValue("No user token found.");
+      }
       return await expenseService.create(expenseData, token);
     } catch (error) {
       const message =
@@ -38,7 +52,10 @@ export const getExpenses = createAsyncThunk(
   "expense/getAll",
   async (parameters, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        return thunkAPI.rejectWithValue("No user token found.");
+      }
       return await expenseService.getExpenses(parameters, token);
     } catch (error) {
       const message =
@@ -56,7 +73,10 @@ export const editExpense = createAsyncThunk(
   "expense/edit",
   async ({ expenseId, expenseData }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        return thunkAPI.rejectWithValue("No user token found.");
+      }
       return await expenseService.editExpense(expenseId, expenseData, token);
     } catch (error) {
       const message =
@@ -74,7 +94,10 @@ export const deleteExpense = createAsyncThunk(
   "expense/delete",
   async (expenseId, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        return thunkAPI.rejectWithValue("No user token found.");
+      }
       return await expenseService.deleteExpense(expenseId, token);
     } catch (error) {
       const message =
@@ -99,7 +122,10 @@ export const exportExpenses = createAsyncThunk(
   "expense/export",
   async (dateRange, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        return thunkAPI.rejectWithValue("No user token found.");
+      }
       const csvData = await expenseService.exportExpenses(dateRange, token);
 
       // Create a URL for the binary data
@@ -111,6 +137,8 @@ export const exportExpenses = createAsyncThunk(
       link.setAttribute("download", `expenses_${Date.now()}.csv`);
       document.body.appendChild(link);
       link.click();
+      // Clean up the DOM by removing the link
+      link.remove();
     } catch (error) {
       const message =
         (error.response &&
@@ -133,7 +161,9 @@ const expenseSlice = createSlice({
       state.isLoading = false;
       state.message = "";
     },
-    resetForExport: () => initialState,
+    resetForExport: () => {
+      return initialState;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -145,10 +175,18 @@ const expenseSlice = createSlice({
         state.isSuccess = true;
         state.message = "Expense added successfully";
 
-        state.expenses.unshift(action.payload.expense);
-        state.count += 1;
+        state.expenses = addExpenseToList(
+          state.expenses,
+          action.payload.expense,
+          state.pagination.limit
+        );
 
-        state.history = action.payload.history;
+        state.pagination.totalPages = Math.ceil(
+          (state.count + 1) / state.pagination.limit
+        );
+
+        state.count += 1;
+        state.history = action.payload.history || {};
       })
       .addCase(createExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -167,8 +205,7 @@ const expenseSlice = createSlice({
         state.expenses = action.payload.expenses;
         state.pagination = action.payload.pagination;
         state.count = action.payload.count;
-
-        state.history = action.payload.history;
+        state.history = action.payload.history || {};
       })
       .addCase(getExpenses.rejected, (state, action) => {
         state.isLoading = false;
@@ -186,13 +223,13 @@ const expenseSlice = createSlice({
 
         state.editData = null;
 
-        state.expenses.map((expense) =>
+        state.expenses = state.expenses.map((expense) =>
           expense._id === action.payload.expense._id
-            ? action.payload.expense
+            ? { ...expense, ...action.payload.expense }
             : expense
         );
 
-        state.history = action.payload.history;
+        state.history = action.payload.history || {};
       })
       .addCase(editExpense.rejected, (state, action) => {
         state.isLoading = false;
@@ -211,8 +248,8 @@ const expenseSlice = createSlice({
         state.expenses = state.expenses.filter(
           (expense) => expense._id !== action.payload.deleted_id
         );
-        state.count -= 1;
-        state.history = action.payload.history;
+        state.count = Math.max(0, state.count - 1);
+        state.history = action.payload.history || {};
       })
       .addCase(deleteExpense.rejected, (state, action) => {
         state.isLoading = false;

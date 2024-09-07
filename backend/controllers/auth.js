@@ -71,7 +71,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     });
     res.status(200).json({ message: "Email sent successfully" });
   } catch (err) {
-    console.log(err);
+    console.log("Email could not be sent", err);
     user.resetPasswordToken = undefined;
     user.resetPasswordToken = undefined;
     await user.save({ validateBeforeSave: false });
@@ -112,5 +112,32 @@ exports.getMe = asyncHandler(async (req, res, next) => {
     email: user.email,
     phone: user.phoneNumber,
     isPremium: user.isPremium,
+  });
+});
+
+exports.setPremium = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { isPremium: true },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    return res.status(400).json({
+      message: "Failed to update user status to premium.",
+    });
+  }
+
+  const token = updatedUser.getSignedToken();
+
+  res.status(200).json({
+    _id: updatedUser._id,
+    username: updatedUser.username,
+    email: updatedUser.email,
+    phone: updatedUser.phoneNumber,
+    isPremium: updatedUser.isPremium,
+    token,
   });
 });

@@ -11,6 +11,7 @@ import Expenses from "./pages/Expenses";
 import Export from "./pages/Export";
 import Reports from "./pages/Reports";
 import Layout from "./components/layout/Layout";
+import BuyPremium from "./components/checkout/BuyPremium";
 
 const App = () => {
   const { user } = useSelector((state) => state.auth);
@@ -29,7 +30,19 @@ const App = () => {
 
           {user && <Route path="/expense" element={<Expenses />} />}
           {user && <Route path="/export" element={<Export />} />}
-          {user && <Route path="/reports" element={<Reports />} />}
+          {user && (
+            <Route
+              path="/reports"
+              element={user.isPremium ? <Reports /> : <BuyPremium />}
+            />
+          )}
+
+          {user && (
+            <Route
+              path="checkout"
+              element={!user.isPremium ? <BuyPremium /> : <Navigate to="/" />}
+            />
+          )}
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

@@ -78,6 +78,27 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+export const setPremium = createAsyncThunk(
+  "auth/set-premium",
+  async (_, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        return thunkAPI.rejectWithValue("No user token found.");
+      }
+      return await authService.setPremiumUser(token);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -150,6 +171,21 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(resetPassword.rejected, (state, action) => {
+        state.message = action.payload;
+        state.isError = true;
+        state.isLoading = false;
+      })
+
+      .addCase(setPremium.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(setPremium.fulfilled, (state, action) => {
+        state.isSuccess = true;
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(setPremium.rejected, (state, action) => {
         state.message = action.payload;
         state.isError = true;
         state.isLoading = false;
