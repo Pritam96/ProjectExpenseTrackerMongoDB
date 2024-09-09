@@ -13,8 +13,7 @@ const getHistoryData = async (userId) => {
     if (!historyData) return {};
     return {
       total: historyData.total,
-      previousDay: historyData.previousDayTotal,
-      today: historyData.todayTotal,
+      daily: historyData.dailyTotals,
       weekly: historyData.weeklyTotals,
       monthly: historyData.monthlyTotals,
       yearly: historyData.yearlyTotals,
@@ -221,7 +220,7 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
     id: expense._id.toString(),
     title: expense.title,
     category: expense.category.title,
-    amount: expense.amount,
+    amount: parseFloat(expense.amount).toFixed(2),
     description: expense.description ? expense.description : "",
     created: moment(expense.createdAt).format("MMMM Do YYYY, h:mm:ss a"),
     updated: moment(expense.updatedAt).format("MMMM Do YYYY, h:mm:ss a"),

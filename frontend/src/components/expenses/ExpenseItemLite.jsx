@@ -33,7 +33,7 @@ const ExpenseItem = ({ expense }) => {
         <Row>
           <Col xs={isCollapsed ? 4 : 3} className="d-flex align-items-center">
             <CardTitle className="mb-0">
-              <h3>₹{expense.amount}</h3>
+              <h3>₹{parseFloat(expense.amount).toFixed(2)}</h3>
             </CardTitle>
           </Col>
           <Col xs={isCollapsed ? 8 : 6}>

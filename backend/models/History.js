@@ -42,24 +42,17 @@ const HistorySchema = new Schema(
         },
       },
     ],
-    todayTotal: {
-      year: Number,
-      month: Number,
-      day: Number,
-      total: {
-        type: Number,
-        default: 0,
+    dailyTotals: [
+      {
+        year: Number,
+        month: Number,
+        day: Number,
+        total: {
+          type: Number,
+          default: 0,
+        },
       },
-    },
-    previousDayTotal: {
-      year: Number,
-      month: Number,
-      day: Number,
-      total: {
-        type: Number,
-        default: 0,
-      },
-    },
+    ],
   },
   { timestamps: true }
 );

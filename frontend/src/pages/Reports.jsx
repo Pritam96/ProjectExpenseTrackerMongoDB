@@ -71,7 +71,7 @@ const Reports = () => {
                           </Col>
                           <Col md={3} sm={3} xs={3}>
                             <CardText className="h2">
-                              ₹{item.totalAmount}
+                              ₹{parseFloat(item.totalAmount).toFixed(2)}
                             </CardText>
                           </Col>
                         </Row>

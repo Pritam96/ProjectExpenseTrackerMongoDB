@@ -12,8 +12,6 @@ const Expenses = () => {
     (state) => state.expenses
   );
 
-  console.log("EXPENSE PAGE RELOADED!");
-
   useEffect(() => {
     if (isSuccess) {
       toast.success(message);

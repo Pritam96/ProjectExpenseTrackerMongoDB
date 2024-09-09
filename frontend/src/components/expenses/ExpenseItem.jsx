@@ -49,7 +49,7 @@ const ExpenseItem = ({ expense }) => {
         <Row>
           <Col xs={3} className="d-flex align-items-center">
             <CardTitle>
-              <h3>₹{expense.amount}</h3>
+              <h3>₹{parseFloat(expense.amount).toFixed(2)}</h3>
             </CardTitle>
           </Col>
           <Col xs={6}>

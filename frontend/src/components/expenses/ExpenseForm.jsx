@@ -34,6 +34,8 @@ const ExpenseForm = () => {
       amountInputRef.current.value = editData.amount;
       categoryInputRef.current.value = editData.categoryId;
       descriptionInputRef.current.value = editData.description || "";
+    } else {
+      resetForm();
     }
   }, [editData]);
 
@@ -42,33 +44,30 @@ const ExpenseForm = () => {
 
     const existingExpenseId = expenseIdInputRef.current.value || null;
     const enteredTitle = titleInputRef.current.value;
-    const enteredAmount = amountInputRef.current.value;
+    const enteredAmount = parseFloat(amountInputRef.current.value);
     const chosenCategory = categoryInputRef.current.value;
     const enteredDescription = descriptionInputRef.current.value;
 
     if (!enteredTitle || !enteredAmount || !chosenCategory) return;
 
+    const expenseData = {
+      title: enteredTitle,
+      amount: enteredAmount,
+      category: chosenCategory,
+      description: enteredDescription,
+    };
+
     if (editData) {
       dispatch(
         editExpense({
           expenseId: existingExpenseId,
-          expenseData: {
-            title: enteredTitle,
-            amount: enteredAmount,
-            category: chosenCategory,
-            description: enteredDescription,
-          },
+          expenseData,
         })
       );
     } else {
-      const expenseData = {
-        title: enteredTitle,
-        amount: enteredAmount,
-        category: chosenCategory,
-        description: enteredDescription,
-      };
       dispatch(createExpense(expenseData));
     }
+
     resetForm();
   };
 
@@ -85,38 +84,41 @@ const ExpenseForm = () => {
     resetForm();
   };
 
-  let historyContent =
-    history && Object.keys(history).length !== 0 ? (
-      <Card className="text-start items-cen">
-        <CardBody className="flex-column">
-          <h3>Expenses</h3>
-          <Col className="mt-3">
-            {history?.previousDay.total !== 0 && (
-              <Row>
-                <Col className="h5">Previous Day:</Col>
-                <Col className="h5 text-center text-secondary">
-                  ₹{history.previousDay.total}
-                </Col>
-              </Row>
-            )}
-            {history?.today.total !== 0 && (
-              <Row>
-                <Col className="h5 text-muted">Today:</Col>
-                <Col className="h5 text-center text-danger">
-                  ₹{history.today.total}
-                </Col>
-              </Row>
-            )}
-            {history?.total !== 0 && (
-              <Row>
-                <Col className="h5 text-muted">All-total:</Col>
-                <Col className="h5 text-center">₹{history.total}</Col>
-              </Row>
-            )}
-          </Col>
-        </CardBody>
-      </Card>
-    ) : null;
+  const historyContent = history && Object.keys(history).length !== 0 && (
+    <Card className="text-start">
+      <CardBody className="flex-column">
+        <h3>Expenses</h3>
+        <Col className="mt-3">
+          {history.daily?.length > 0 && (
+            <Row>
+              <Col className="h5 text-muted">Previous-day:</Col>
+              <Col className="h5 text-center text-muted">
+                {history.daily.length > 1
+                  ? `₹${history.daily[history.daily.length - 1].total.toFixed(
+                      2
+                    )}`
+                  : `₹0.00`}
+              </Col>
+            </Row>
+          )}
+          {history.daily?.length > 0 && (
+            <Row>
+              <Col className="h5 text-muted">Today:</Col>
+              <Col className="h5 text-center text-danger">
+                ₹{history.daily[history.daily.length - 1].total.toFixed(2)}
+              </Col>
+            </Row>
+          )}
+          {history.total > 0 && (
+            <Row>
+              <Col className="h5 text-muted">All-total:</Col>
+              <Col className="h5 text-center">₹{history.total.toFixed(2)}</Col>
+            </Row>
+          )}
+        </Col>
+      </CardBody>
+    </Card>
+  );
 
   return (
     <Container fluid className="bg-light rounded p-3">

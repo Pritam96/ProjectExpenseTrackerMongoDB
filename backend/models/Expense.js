@@ -116,26 +116,13 @@ async function updateHistoryTotals(userId, amount) {
       amount
     );
 
-    // Check if the current date is the same as the current 'todayTotal' date
-    if (
-      history.todayTotal.year === currentYear &&
-      history.todayTotal.month === currentMonth &&
-      history.todayTotal.day === currentDay
-    ) {
-      // Update today's total if it's the same day, ensuring it doesn't go negative
-      history.todayTotal.total = Math.max(0, history.todayTotal.total + amount);
-    } else {
-      // If it's a new day, move today's total to previousDayTotal
-      history.previousDayTotal = { ...history.todayTotal };
-
-      // Reset today's total to the current day
-      history.todayTotal = {
-        year: currentYear,
-        month: currentMonth,
-        day: currentDay,
-        total: Math.max(0, amount),
-      };
-    }
+    // Update daily totals
+    await updateNestedTotal(
+      history,
+      "dailyTotals",
+      { year: currentYear, month: currentMonth, day: currentDay },
+      amount
+    );
 
     // Save the history document, ensuring no parallel saves
     await history.save();
