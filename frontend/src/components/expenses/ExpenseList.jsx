@@ -7,14 +7,19 @@ import PaginationComponent from "../UI/PaginationComponent";
 import moment from "moment";
 
 const ExpenseList = () => {
-  const [type, setType] = useState("daily");
+  const [type, setType] = useState("all");
   const dispatch = useDispatch();
   const { expenses, count, isLoading, pagination } = useSelector(
     (state) => state.expenses
   );
+  const { editData } = useSelector((state) => state.expenses);
 
   const dateRanges = useMemo(
     () => ({
+      all: {
+        start: undefined,
+        end: undefined,
+      },
       daily: {
         start: moment().startOf("day").toISOString(),
         end: moment().endOf("day").toISOString(),
@@ -74,6 +79,7 @@ const ExpenseList = () => {
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
+            <option value="all">All</option>
             <option value="daily">Today</option>
             <option value="weekly">This Week</option>
             <option value="monthly">This Month</option>
@@ -96,7 +102,7 @@ const ExpenseList = () => {
           <div className="h5 mt-5 text-center">No expenses found!</div>
         )}
       </Row>
-      {!isLoading && expenses.length > 0 && (
+      {!isLoading && !editData && expenses.length > 0 && (
         <Row>
           <PaginationComponent
             pagination={pagination}

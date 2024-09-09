@@ -164,6 +164,9 @@ const expenseSlice = createSlice({
     resetForExport: () => {
       return initialState;
     },
+    cancelEdit: (state) => {
+      state.editData = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -277,5 +280,6 @@ const expenseSlice = createSlice({
   },
 });
 
-export const { resetToInitialState, resetForExport } = expenseSlice.actions;
+export const { resetToInitialState, resetForExport, cancelEdit } =
+  expenseSlice.actions;
 export default expenseSlice.reducer;

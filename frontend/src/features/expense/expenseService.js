@@ -21,7 +21,7 @@ const getExpenses = async ({ dateRange, pagination } = {}, token) => {
 
   const params = new URLSearchParams();
 
-  if (dateRange) {
+  if (dateRange && dateRange.start && dateRange.end) {
     params.append("start", dateRange.start);
     params.append("end", dateRange.end);
   }

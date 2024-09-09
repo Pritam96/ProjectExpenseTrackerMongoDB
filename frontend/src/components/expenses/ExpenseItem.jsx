@@ -10,16 +10,27 @@ import {
   Row,
 } from "react-bootstrap";
 import moment from "moment";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   deleteExpense,
   loadExpense,
 } from "../../features/expense/expenseSlice";
+import { useEffect, useState } from "react";
 
 const ExpenseItem = ({ expense }) => {
+  const [editBtnClick, setEditBtnClick] = useState(false);
+  const { editData } = useSelector((state) => state.expenses);
+
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    if (!editData) {
+      setEditBtnClick(false);
+    }
+  }, [editData]);
+
   const editHandler = () => {
+    setEditBtnClick(true);
     dispatch(loadExpense(expense));
   };
 
@@ -27,11 +38,16 @@ const ExpenseItem = ({ expense }) => {
     dispatch(deleteExpense(expense._id));
   };
 
+  const cardStyles = editBtnClick ? { backgroundColor: "#e0f7fa" } : {};
+
+  const categoryBadgeColor = editBtnClick ? "warning" : "success";
+  const dateBadgeColor = editBtnClick ? "info" : "secondary";
+
   return (
-    <Card className="mt-3 shadow">
+    <Card className="mt-3 shadow" style={cardStyles}>
       <CardBody>
         <Row>
-          <Col xs={3} className="d-flex align-items">
+          <Col xs={3} className="d-flex align-items-center">
             <CardTitle>
               <h3>₹{expense.amount}</h3>
             </CardTitle>
@@ -48,10 +64,10 @@ const ExpenseItem = ({ expense }) => {
               </Row>
             )}
             <Row className="d-flex justify-content-between mt-2 px-2">
-              <Badge bg="success" className="mb-2">
+              <Badge bg={categoryBadgeColor} className="mb-2">
                 {expense.category}
               </Badge>
-              <Badge bg="dark">
+              <Badge bg={dateBadgeColor}>
                 {moment(expense.createdAt).format("MMMM Do YYYY, h:mm:ss a")}
               </Badge>
             </Row>
@@ -63,6 +79,7 @@ const ExpenseItem = ({ expense }) => {
                 variant="info"
                 size="sm"
                 onClick={editHandler}
+                disabled={editData}
               >
                 Edit
               </Button>
@@ -71,6 +88,7 @@ const ExpenseItem = ({ expense }) => {
                 variant="danger"
                 size="sm"
                 onClick={deleteHandler}
+                disabled={editData}
               >
                 Delete
               </Button>

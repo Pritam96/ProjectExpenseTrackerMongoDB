@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createExpense,
   editExpense,
+  cancelEdit,
 } from "../../features/expense/expenseSlice";
 import Input from "../UI/Input";
 import CategoryList from "./category/CategoryList";
@@ -45,6 +46,8 @@ const ExpenseForm = () => {
     const chosenCategory = categoryInputRef.current.value;
     const enteredDescription = descriptionInputRef.current.value;
 
+    if (!enteredTitle || !enteredAmount || !chosenCategory) return;
+
     if (editData) {
       dispatch(
         editExpense({
@@ -75,6 +78,11 @@ const ExpenseForm = () => {
     amountInputRef.current.value = "";
     categoryInputRef.current.value = "";
     descriptionInputRef.current.value = "";
+  };
+
+  const cancelHandler = () => {
+    dispatch(cancelEdit());
+    resetForm();
   };
 
   let historyContent =
@@ -111,7 +119,7 @@ const ExpenseForm = () => {
     ) : null;
 
   return (
-    <Container fluid>
+    <Container fluid className="bg-light rounded p-3">
       {historyContent}
       <Form onSubmit={formHandler}>
         <Input id="expenseIdInput" type="hidden" ref={expenseIdInputRef} />
@@ -142,9 +150,17 @@ const ExpenseForm = () => {
           ref={descriptionInputRef}
         />
 
-        <Button type="submit" variant="primary" className="mt-3 w-100">
-          Save
-        </Button>
+        <div className="d-grid gap-2">
+          <Button type="submit" variant="primary">
+            Save
+          </Button>
+
+          {editData && (
+            <Button type="button" variant="secondary" onClick={cancelHandler}>
+              Cancel
+            </Button>
+          )}
+        </div>
       </Form>
     </Container>
   );
