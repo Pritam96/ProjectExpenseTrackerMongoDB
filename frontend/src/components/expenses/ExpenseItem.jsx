@@ -68,7 +68,7 @@ const ExpenseItem = ({ expense }) => {
                 {expense.category}
               </Badge>
               <Badge bg={dateBadgeColor}>
-                {moment(expense.createdAt).format("MMMM Do YYYY, h:mm:ss a")}
+                {moment(expense.createdAt).fromNow()}
               </Badge>
             </Row>
           </Col>

@@ -13,7 +13,7 @@ const getHistoryData = async (userId) => {
     if (!historyData) return {};
     return {
       total: historyData.total,
-      daily: historyData.dailyTotals,
+      daily: historyData.dailyTotals.slice(-10),
       weekly: historyData.weeklyTotals,
       monthly: historyData.monthlyTotals,
       yearly: historyData.yearlyTotals,

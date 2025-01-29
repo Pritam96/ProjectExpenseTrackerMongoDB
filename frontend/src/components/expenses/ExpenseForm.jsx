@@ -18,22 +18,26 @@ import Input from "../UI/Input";
 import CategoryList from "./category/CategoryList";
 
 const ExpenseForm = () => {
-  const expenseIdInputRef = useRef();
-  const titleInputRef = useRef();
-  const amountInputRef = useRef();
-  const categoryInputRef = useRef();
-  const descriptionInputRef = useRef();
+  const expenseIdInputRef = useRef(null);
+  const titleInputRef = useRef(null);
+  const amountInputRef = useRef(null);
+  const categoryInputRef = useRef(null);
+  const descriptionInputRef = useRef(null);
 
   const dispatch = useDispatch();
   const { editData, history } = useSelector((state) => state.expenses);
 
   useEffect(() => {
     if (editData) {
-      expenseIdInputRef.current.value = editData._id;
-      titleInputRef.current.value = editData.title;
-      amountInputRef.current.value = editData.amount;
-      categoryInputRef.current.value = editData.categoryId;
-      descriptionInputRef.current.value = editData.description || "";
+      if (expenseIdInputRef.current)
+        expenseIdInputRef.current.value = editData._id;
+      if (titleInputRef.current) titleInputRef.current.value = editData.title;
+      if (amountInputRef.current)
+        amountInputRef.current.value = editData.amount.toFixed(2);
+      if (categoryInputRef.current)
+        categoryInputRef.current.value = editData.categoryId;
+      if (descriptionInputRef.current)
+        descriptionInputRef.current.value = editData.description || "";
     } else {
       resetForm();
     }
@@ -42,17 +46,17 @@ const ExpenseForm = () => {
   const formHandler = (e) => {
     e.preventDefault();
 
-    const existingExpenseId = expenseIdInputRef.current.value || null;
-    const enteredTitle = titleInputRef.current.value;
-    const enteredAmount = parseFloat(amountInputRef.current.value);
-    const chosenCategory = categoryInputRef.current.value;
-    const enteredDescription = descriptionInputRef.current.value;
+    const existingExpenseId = expenseIdInputRef.current?.value || null;
+    const enteredTitle = titleInputRef.current?.value;
+    const enteredAmount = parseFloat(amountInputRef.current?.value);
+    const chosenCategory = categoryInputRef.current?.value;
+    const enteredDescription = descriptionInputRef.current?.value;
 
-    if (!enteredTitle || !enteredAmount || !chosenCategory) return;
+    if (!enteredTitle || isNaN(enteredAmount) || !chosenCategory) return;
 
     const expenseData = {
       title: enteredTitle,
-      amount: enteredAmount,
+      amount: parseFloat(enteredAmount.toFixed(2)),
       category: chosenCategory,
       description: enteredDescription,
     };
@@ -72,11 +76,11 @@ const ExpenseForm = () => {
   };
 
   const resetForm = () => {
-    expenseIdInputRef.current.value = "";
-    titleInputRef.current.value = "";
-    amountInputRef.current.value = "";
-    categoryInputRef.current.value = "";
-    descriptionInputRef.current.value = "";
+    if (expenseIdInputRef.current) expenseIdInputRef.current.value = "";
+    if (titleInputRef.current) titleInputRef.current.value = "";
+    if (amountInputRef.current) amountInputRef.current.value = "";
+    if (categoryInputRef.current) categoryInputRef.current.value = "";
+    if (descriptionInputRef.current) descriptionInputRef.current.value = "";
   };
 
   const cancelHandler = () => {
@@ -84,37 +88,68 @@ const ExpenseForm = () => {
     resetForm();
   };
 
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentDay = currentDate.getDate();
+
+  const previousDate = new Date(currentDate);
+  previousDate.setDate(currentDate.getDate() - 1);
+  const previousYear = previousDate.getFullYear();
+  const previousMonth = previousDate.getMonth() + 1;
+  const previousDay = previousDate.getDate();
+
+  const total = parseFloat(history?.total || 0).toFixed(2);
+  let today = "0.00";
+  let previous = "0.00";
+
+  if (history?.daily?.length > 0) {
+    const latestEntry = history.daily[history.daily.length - 1];
+    if (
+      latestEntry.day === currentDay &&
+      latestEntry.month === currentMonth &&
+      latestEntry.year === currentYear
+    ) {
+      today = parseFloat(latestEntry.total || 0).toFixed(2);
+    }
+
+    if (history.daily.length > 1) {
+      const previousEntry = history.daily[history.daily.length - 2];
+      if (
+        previousEntry.day === previousDay &&
+        previousEntry.month === previousMonth &&
+        previousEntry.year === previousYear
+      ) {
+        previous = parseFloat(previousEntry.total || 0).toFixed(2);
+      }
+    } else if (
+      latestEntry.day === previousDay &&
+      latestEntry.month === previousMonth &&
+      latestEntry.year === previousYear
+    ) {
+      previous = parseFloat(latestEntry.total || 0).toFixed(2);
+    }
+  }
+
   const historyContent = history && Object.keys(history).length !== 0 && (
     <Card className="text-start">
       <CardBody className="flex-column">
         <h3>Expenses</h3>
         <Col className="mt-3">
-          {history.daily?.length > 0 && (
-            <Row>
-              <Col className="h5 text-muted">Previous-day:</Col>
-              <Col className="h5 text-center text-muted">
-                {history.daily.length > 1
-                  ? `₹${history.daily[history.daily.length - 1].total.toFixed(
-                      2
-                    )}`
-                  : `₹0.00`}
-              </Col>
-            </Row>
-          )}
-          {history.daily?.length > 0 && (
-            <Row>
-              <Col className="h5 text-muted">Today:</Col>
-              <Col className="h5 text-center text-danger">
-                ₹{history.daily[history.daily.length - 1].total.toFixed(2)}
-              </Col>
-            </Row>
-          )}
-          {history.total > 0 && (
-            <Row>
-              <Col className="h5 text-muted">All-total:</Col>
-              <Col className="h5 text-center">₹{history.total.toFixed(2)}</Col>
-            </Row>
-          )}
+          <Row>
+            <Col className="h5 text-muted">Previous:</Col>
+            <Col className="h5 text-center text-muted">₹{previous}</Col>
+          </Row>
+
+          <Row>
+            <Col className="h5 text-muted">Today:</Col>
+            <Col className="h5 text-center text-danger">₹{today}</Col>
+          </Row>
+
+          <Row>
+            <Col className="h5 text-muted">Total:</Col>
+            <Col className="h5 text-center">₹{total}</Col>
+          </Row>
         </Col>
       </CardBody>
     </Card>

@@ -1,12 +1,4 @@
-import {
-  Container,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarCollapse,
-  NavbarToggle,
-  NavLink,
-} from "react-bootstrap";
+import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import {
   FaSignInAlt,
@@ -33,56 +25,61 @@ const Header = () => {
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
           <LinkContainer to="/">
-            <NavbarBrand className="d-flex align-items-center">
+            <Navbar.Brand className="d-flex align-items-center">
               <FaWallet className="me-2" size={25} />
               ExpenseTracker
-            </NavbarBrand>
+            </Navbar.Brand>
           </LinkContainer>
-          <NavbarToggle aria-controls="basic-navbar-nav" />
-          <NavbarCollapse>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               {user ? (
                 <>
                   <LinkContainer to="/expense">
-                    <NavLink className="d-flex align-items-center">
+                    <Nav.Link className="d-flex align-items-center">
                       Expenses
-                    </NavLink>
+                    </Nav.Link>
                   </LinkContainer>
                   <LinkContainer to="/export">
-                    <NavLink className="d-flex align-items-center">
+                    <Nav.Link className="d-flex align-items-center">
                       Export
-                    </NavLink>
+                    </Nav.Link>
                   </LinkContainer>
                   <LinkContainer to="/reports">
-                    <NavLink className="d-flex align-items-center">
+                    <Nav.Link className="d-flex align-items-center">
                       Reports
-                    </NavLink>
+                    </Nav.Link>
                   </LinkContainer>
-                  <NavLink
-                    className="d-flex align-items-center"
-                    onClick={logoutHandler}
+
+                  <NavDropdown
+                    title={`Welcome, ${user.username || "User"}`}
+                    id="user-dropdown"
+                    menualign="end"
                   >
-                    <FaSignOutAlt className="me-2" size={20} />
-                    Logout
-                  </NavLink>
+                    <NavDropdown.Item onClick={logoutHandler}>
+                      <FaSignOutAlt className="me-2" size={18} />
+                      Logout
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 </>
               ) : (
                 <>
                   <LinkContainer to="/login">
-                    <NavLink className="d-flex align-items-center">
+                    <Nav.Link className="d-flex align-items-center">
                       <FaSignInAlt className="me-2" size={20} />
                       Login
-                    </NavLink>
+                    </Nav.Link>
                   </LinkContainer>
                   <LinkContainer to="/register">
-                    <NavLink className="d-flex align-items-center">
-                      <FaUserPlus className="me-2" size={20} /> Register
-                    </NavLink>
+                    <Nav.Link className="d-flex align-items-center">
+                      <FaUserPlus className="me-2" size={20} />
+                      Register
+                    </Nav.Link>
                   </LinkContainer>
                 </>
               )}
             </Nav>
-          </NavbarCollapse>
+          </Navbar.Collapse>
         </Container>
       </Navbar>
     </header>
