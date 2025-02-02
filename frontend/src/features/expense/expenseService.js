@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "/api/expense";
 
-const create = async (expenseData, token) => {
+const addExpense = async (expenseData, token) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -76,7 +76,7 @@ const exportExpenses = async (dateRange, token) => {
 };
 
 const authService = {
-  create,
+  addExpense,
   getExpenses,
   editExpense,
   deleteExpense,

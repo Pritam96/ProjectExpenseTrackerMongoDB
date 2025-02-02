@@ -11,19 +11,31 @@ const initialState = {
   message: "",
 };
 
+// Utility function to extract error message
+const getErrorMessage = (error) => {
+  return (
+    (error.response && error.response.data && error.response.data.message) ||
+    error.message ||
+    error.toString()
+  );
+};
+
+// Utility function to reset state
+const resetState = (state) => {
+  state.isError = false;
+  state.isSuccess = false;
+  state.isLoading = false;
+  state.message = "";
+};
+
+// Async thunks
 export const register = createAsyncThunk(
   "auth/register",
   async (data, thunkAPI) => {
     try {
       return await authService.register(data);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
@@ -32,11 +44,7 @@ export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
   try {
     return await authService.login(data);
   } catch (error) {
-    const message =
-      (error.response && error.response.data && error.response.data.message) ||
-      error.message ||
-      error.toString();
-    return thunkAPI.rejectWithValue(message);
+    return thunkAPI.rejectWithValue(getErrorMessage(error));
   }
 });
 
@@ -50,13 +58,7 @@ export const forgotPassword = createAsyncThunk(
     try {
       await authService.forgotPassword(data);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
@@ -67,13 +69,7 @@ export const resetPassword = createAsyncThunk(
     try {
       await authService.resetPassword(data.token, data.password);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
@@ -88,27 +84,17 @@ export const setPremium = createAsyncThunk(
       }
       return await authService.setPremiumUser(token);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
+// Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    reset: (state) => {
-      state.isError = false;
-      state.isSuccess = false;
-      state.isLoading = false;
-      state.message = "";
-    },
+    reset: (state) => resetState(state),
   },
   extraReducers: (builder) => {
     builder
@@ -127,7 +113,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
       })
-
       .addCase(login.pending, (state) => {
         state.isLoading = true;
         state.isError = false;
@@ -143,11 +128,9 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
       })
-
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
       })
-
       .addCase(forgotPassword.pending, (state) => {
         state.isLoading = true;
         state.isError = false;
@@ -161,7 +144,6 @@ const authSlice = createSlice({
         state.isError = true;
         state.isLoading = false;
       })
-
       .addCase(resetPassword.pending, (state) => {
         state.isLoading = true;
         state.isError = false;
@@ -175,7 +157,6 @@ const authSlice = createSlice({
         state.isError = true;
         state.isLoading = false;
       })
-
       .addCase(setPremium.pending, (state) => {
         state.isLoading = true;
         state.isError = false;

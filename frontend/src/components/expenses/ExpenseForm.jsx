@@ -12,47 +12,45 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createExpense,
   editExpense,
-  cancelEdit,
 } from "../../features/expense/expenseSlice";
 import Input from "../UI/Input";
 import CategoryList from "./category/CategoryList";
 import moment from "moment";
 
-const ExpenseForm = () => {
-  const expenseIdInputRef = useRef(null);
+const ExpenseForm = ({ expenseId, setExpenseId }) => {
   const amountInputRef = useRef(null);
   const categoryInputRef = useRef(null);
   const descriptionInputRef = useRef(null);
   const dateInputRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { editData, history, isLoading } = useSelector(
-    (state) => state.expenses
+
+  const { history, isLoading } = useSelector((state) => state.expenses);
+
+  const expenseData = useSelector(
+    (state) =>
+      expenseId && state.expenses.expenses.find((e) => e._id === expenseId)
   );
 
   useEffect(() => {
-    if (editData) {
-      if (expenseIdInputRef.current)
-        expenseIdInputRef.current.value = editData._id;
+    if (expenseId) {
       if (amountInputRef.current)
-        amountInputRef.current.value = editData.amount.toFixed(2);
+        amountInputRef.current.value = expenseData.amount.toFixed(2);
       if (categoryInputRef.current)
-        categoryInputRef.current.value = editData.categoryId;
+        categoryInputRef.current.value = expenseData.categoryId;
       if (descriptionInputRef.current)
-        descriptionInputRef.current.value = editData.description || "";
+        descriptionInputRef.current.value = expenseData.description || "";
       if (dateInputRef.current)
-        dateInputRef.current.value = moment(editData.date).format(
+        dateInputRef.current.value = moment(expenseData.date).format(
           "YYYY-MM-DDTHH:mm"
         );
     } else {
       resetForm();
     }
-  }, [editData]);
+  }, [expenseData]);
 
   const formHandler = (e) => {
     e.preventDefault();
-
-    const existingExpenseId = expenseIdInputRef.current?.value || null;
     const enteredAmount = parseFloat(amountInputRef.current?.value);
     const chosenCategory = categoryInputRef.current?.value;
     const enteredDescription = descriptionInputRef.current?.value;
@@ -60,38 +58,32 @@ const ExpenseForm = () => {
 
     if (isNaN(enteredAmount) || !chosenCategory) return;
 
-    const expenseData = {
+    const data = {
       amount: parseFloat(enteredAmount.toFixed(2)),
       category: chosenCategory,
       description: enteredDescription,
       date: moment(chosenDateTime).toISOString(),
     };
 
-    if (editData) {
+    if (expenseId) {
       dispatch(
         editExpense({
-          expenseId: existingExpenseId,
-          expenseData,
+          expenseId,
+          expenseData: data,
         })
       );
     } else {
-      dispatch(createExpense(expenseData));
+      dispatch(createExpense(data));
     }
-
     resetForm();
   };
 
   const resetForm = () => {
-    if (expenseIdInputRef.current) expenseIdInputRef.current.value = "";
+    setExpenseId(null);
     if (amountInputRef.current) amountInputRef.current.value = "";
     if (categoryInputRef.current) categoryInputRef.current.value = "";
     if (descriptionInputRef.current) descriptionInputRef.current.value = "";
     if (dateInputRef.current) dateInputRef.current.value = "";
-  };
-
-  const cancelHandler = () => {
-    dispatch(cancelEdit());
-    resetForm();
   };
 
   const currentDate = new Date();
@@ -165,8 +157,6 @@ const ExpenseForm = () => {
     <Container fluid className="bg-light rounded p-3">
       {!isLoading && historyContent}
       <Form onSubmit={formHandler} autoComplete="off">
-        <Input id="expenseIdInput" type="hidden" ref={expenseIdInputRef} />
-
         <Input
           id="amountInput"
           type="number"
@@ -200,8 +190,8 @@ const ExpenseForm = () => {
             Save
           </Button>
 
-          {editData && (
-            <Button type="button" variant="secondary" onClick={cancelHandler}>
+          {expenseData && (
+            <Button type="button" variant="secondary" onClick={resetForm}>
               Cancel
             </Button>
           )}

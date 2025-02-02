@@ -6,7 +6,7 @@ import { Col, Container, FormSelect, Row, Spinner } from "react-bootstrap";
 import PaginationComponent from "../UI/PaginationComponent";
 import moment from "moment";
 
-const ExpenseList = () => {
+const ExpenseList = ({ expenseId, setExpenseId }) => {
   const [type, setType] = useState("all");
   const dispatch = useDispatch();
   const { expenses, count, isLoading, pagination } = useSelector(
@@ -95,7 +95,12 @@ const ExpenseList = () => {
         ) : expenses.length !== 0 ? (
           expenses.map((expense) => (
             <div key={expense._id}>
-              <ExpenseItem expense={expense} showButtons={true} />
+              <ExpenseItem
+                expense={expense}
+                showButtons={true}
+                expenseId={expenseId}
+                setExpenseId={setExpenseId}
+              />
             </div>
           ))
         ) : (

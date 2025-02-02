@@ -9,28 +9,18 @@ import {
   Row,
 } from "react-bootstrap";
 import moment from "moment";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteExpense,
-  loadExpense,
-} from "../../features/expense/expenseSlice";
-import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { deleteExpense } from "../../features/expense/expenseSlice";
+import { useState } from "react";
 
-const ExpenseItem = ({ expense, showButtons }) => {
+const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
   const [editBtnClick, setEditBtnClick] = useState(false);
-  const { editData } = useSelector((state) => state.expenses);
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!editData) {
-      setEditBtnClick(false);
-    }
-  }, [editData]);
-
   const editHandler = () => {
     setEditBtnClick(true);
-    dispatch(loadExpense(expense));
+    setExpenseId(expense._id);
   };
 
   const deleteHandler = () => {
@@ -80,7 +70,7 @@ const ExpenseItem = ({ expense, showButtons }) => {
                   variant="info"
                   size="sm"
                   onClick={editHandler}
-                  disabled={editData}
+                  disabled={expenseId}
                 >
                   Edit
                 </Button>
@@ -89,7 +79,7 @@ const ExpenseItem = ({ expense, showButtons }) => {
                   variant="danger"
                   size="sm"
                   onClick={deleteHandler}
-                  disabled={editData}
+                  disabled={expenseId}
                 >
                   Delete
                 </Button>

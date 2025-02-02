@@ -149,7 +149,7 @@ const Export = () => {
               ) : (
                 <div className="h5 mt-5 text-center">
                   {!startDate || !endDate
-                    ? "Choose a range to view expenses "
+                    ? "Please select a date range to display the corresponding expenses."
                     : "No expenses found!"}
                 </div>
               )}

@@ -11,7 +11,6 @@ const initialState = {
     limit: 4,
   },
   count: 0,
-  editData: null,
   history: {
     total: null,
     daily: null,
@@ -25,6 +24,7 @@ const initialState = {
   message: "",
 };
 
+// Utility function to add a new expense to the list
 const addExpenseToList = (expenses, newExpense, limit) => {
   const newArray = [newExpense, ...expenses];
   if (newArray.length > limit) {
@@ -33,6 +33,16 @@ const addExpenseToList = (expenses, newExpense, limit) => {
   return newArray;
 };
 
+// Utility function to extract error message
+const getErrorMessage = (error) => {
+  return (
+    (error.response && error.response.data && error.response.data.message) ||
+    error.message ||
+    error.toString()
+  );
+};
+
+// Async thunk for creating an expense
 export const createExpense = createAsyncThunk(
   "expense/create",
   async (expenseData, thunkAPI) => {
@@ -41,19 +51,14 @@ export const createExpense = createAsyncThunk(
       if (!token) {
         return thunkAPI.rejectWithValue("No user token found.");
       }
-      return await expenseService.create(expenseData, token);
+      return await expenseService.addExpense(expenseData, token);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
+// Async thunk for fetching expenses
 export const getExpenses = createAsyncThunk(
   "expense/getAll",
   async (parameters, thunkAPI) => {
@@ -64,17 +69,12 @@ export const getExpenses = createAsyncThunk(
       }
       return await expenseService.getExpenses(parameters, token);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
+// Async thunk for editing an expense
 export const editExpense = createAsyncThunk(
   "expense/edit",
   async ({ expenseId, expenseData }, thunkAPI) => {
@@ -85,17 +85,12 @@ export const editExpense = createAsyncThunk(
       }
       return await expenseService.editExpense(expenseId, expenseData, token);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
+// Async thunk for deleting an expense
 export const deleteExpense = createAsyncThunk(
   "expense/delete",
   async (expenseId, thunkAPI) => {
@@ -106,24 +101,12 @@ export const deleteExpense = createAsyncThunk(
       }
       return await expenseService.deleteExpense(expenseId, token);
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
-export const loadExpense = createAsyncThunk(
-  "expense/load",
-  async (expenseData) => {
-    return expenseData;
-  }
-);
-
+// Async thunk for exporting expenses
 export const exportExpenses = createAsyncThunk(
   "expense/export",
   async (dateRange, thunkAPI) => {
@@ -133,7 +116,6 @@ export const exportExpenses = createAsyncThunk(
         return thunkAPI.rejectWithValue("No user token found.");
       }
       const csvData = await expenseService.exportExpenses(dateRange, token);
-
       // Create a URL for the binary data
       const url = window.URL.createObjectURL(
         new Blob([csvData], { type: "text/csv" })
@@ -146,13 +128,7 @@ export const exportExpenses = createAsyncThunk(
       // Clean up the DOM by removing the link
       link.remove();
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
@@ -167,12 +143,7 @@ const expenseSlice = createSlice({
       state.isLoading = false;
       state.message = "";
     },
-    resetForExport: () => {
-      return initialState;
-    },
-    cancelEdit: (state) => {
-      state.editData = null;
-    },
+    resetForExport: () => initialState,
   },
   extraReducers: (builder) => {
     builder
@@ -202,14 +173,12 @@ const expenseSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
-
       .addCase(getExpenses.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(getExpenses.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        // state.message = "Expenses fetched successfully";
 
         state.expenses = action.payload.expenses;
         state.pagination = action.payload.pagination;
@@ -221,7 +190,6 @@ const expenseSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
-
       .addCase(editExpense.pending, (state) => {
         state.isLoading = true;
       })
@@ -229,8 +197,6 @@ const expenseSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.message = "Expense updated successfully";
-
-        state.editData = null;
 
         state.expenses = state.expenses.map((expense) =>
           expense._id === action.payload.expense._id
@@ -245,7 +211,6 @@ const expenseSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
-
       .addCase(deleteExpense.pending, (state) => {
         state.isLoading = true;
       })
@@ -265,11 +230,6 @@ const expenseSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
-
-      .addCase(loadExpense.fulfilled, (state, action) => {
-        state.editData = { ...action.payload };
-      })
-
       .addCase(exportExpenses.pending, (state) => {
         state.isLoading = true;
       })
@@ -286,6 +246,5 @@ const expenseSlice = createSlice({
   },
 });
 
-export const { resetToInitialState, resetForExport, cancelEdit } =
-  expenseSlice.actions;
+export const { resetToInitialState, resetForExport } = expenseSlice.actions;
 export default expenseSlice.reducer;
