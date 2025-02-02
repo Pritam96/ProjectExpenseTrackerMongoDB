@@ -16,28 +16,34 @@ import {
 } from "../../features/expense/expenseSlice";
 import Input from "../UI/Input";
 import CategoryList from "./category/CategoryList";
+import moment from "moment";
 
 const ExpenseForm = () => {
   const expenseIdInputRef = useRef(null);
-  const titleInputRef = useRef(null);
   const amountInputRef = useRef(null);
   const categoryInputRef = useRef(null);
   const descriptionInputRef = useRef(null);
+  const dateInputRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { editData, history } = useSelector((state) => state.expenses);
+  const { editData, history, isLoading } = useSelector(
+    (state) => state.expenses
+  );
 
   useEffect(() => {
     if (editData) {
       if (expenseIdInputRef.current)
         expenseIdInputRef.current.value = editData._id;
-      if (titleInputRef.current) titleInputRef.current.value = editData.title;
       if (amountInputRef.current)
         amountInputRef.current.value = editData.amount.toFixed(2);
       if (categoryInputRef.current)
         categoryInputRef.current.value = editData.categoryId;
       if (descriptionInputRef.current)
         descriptionInputRef.current.value = editData.description || "";
+      if (dateInputRef.current)
+        dateInputRef.current.value = moment(editData.date).format(
+          "YYYY-MM-DDTHH:mm"
+        );
     } else {
       resetForm();
     }
@@ -47,18 +53,18 @@ const ExpenseForm = () => {
     e.preventDefault();
 
     const existingExpenseId = expenseIdInputRef.current?.value || null;
-    const enteredTitle = titleInputRef.current?.value;
     const enteredAmount = parseFloat(amountInputRef.current?.value);
     const chosenCategory = categoryInputRef.current?.value;
     const enteredDescription = descriptionInputRef.current?.value;
+    const chosenDateTime = dateInputRef.current?.value || null;
 
-    if (!enteredTitle || isNaN(enteredAmount) || !chosenCategory) return;
+    if (isNaN(enteredAmount) || !chosenCategory) return;
 
     const expenseData = {
-      title: enteredTitle,
       amount: parseFloat(enteredAmount.toFixed(2)),
       category: chosenCategory,
       description: enteredDescription,
+      date: moment(chosenDateTime).toISOString(),
     };
 
     if (editData) {
@@ -77,10 +83,10 @@ const ExpenseForm = () => {
 
   const resetForm = () => {
     if (expenseIdInputRef.current) expenseIdInputRef.current.value = "";
-    if (titleInputRef.current) titleInputRef.current.value = "";
     if (amountInputRef.current) amountInputRef.current.value = "";
     if (categoryInputRef.current) categoryInputRef.current.value = "";
     if (descriptionInputRef.current) descriptionInputRef.current.value = "";
+    if (dateInputRef.current) dateInputRef.current.value = "";
   };
 
   const cancelHandler = () => {
@@ -157,16 +163,9 @@ const ExpenseForm = () => {
 
   return (
     <Container fluid className="bg-light rounded p-3">
-      {historyContent}
-      <Form onSubmit={formHandler}>
+      {!isLoading && historyContent}
+      <Form onSubmit={formHandler} autoComplete="off">
         <Input id="expenseIdInput" type="hidden" ref={expenseIdInputRef} />
-        <Input
-          id="titleInput"
-          label="Title"
-          labelClasses="h5"
-          placeholder="Enter title"
-          ref={titleInputRef}
-        />
 
         <Input
           id="amountInput"
@@ -185,6 +184,15 @@ const ExpenseForm = () => {
           labelClasses="h5"
           placeholder="Enter description"
           ref={descriptionInputRef}
+        />
+
+        <Input
+          id="dateTimeInput"
+          label="Date"
+          type="datetime-local"
+          labelClasses="h5"
+          placeholder="Choose date"
+          ref={dateInputRef}
         />
 
         <div className="d-grid gap-2">

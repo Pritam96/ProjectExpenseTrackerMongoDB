@@ -8,6 +8,7 @@ const Input = forwardRef((props, ref) => {
     label,
     labelClasses = "",
     placeholder,
+    autoComplete = type === "password" ? "new-password" : "off",
     ...rest
   } = props;
 
@@ -18,7 +19,13 @@ const Input = forwardRef((props, ref) => {
   return (
     <FormGroup className="my-3" controlId={id}>
       {label && <FormLabel className={labelClasses}>{label}</FormLabel>}
-      <FormControl type={type} placeholder={placeholder} ref={ref} {...rest} />
+      <FormControl
+        type={type}
+        placeholder={placeholder}
+        ref={ref}
+        autoComplete={autoComplete}
+        {...rest}
+      />
     </FormGroup>
   );
 });

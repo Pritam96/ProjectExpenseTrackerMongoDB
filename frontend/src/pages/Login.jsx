@@ -54,7 +54,7 @@ const Login = () => {
         <FaSignInAlt className="me-2" />
         Log In
       </h3>
-      <Form onSubmit={submitHandler}>
+      <Form onSubmit={submitHandler} autoComplete="off">
         <Input
           id="emailInput"
           type="email"

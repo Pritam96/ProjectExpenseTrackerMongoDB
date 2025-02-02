@@ -66,7 +66,7 @@ const ResetPassword = () => {
   return (
     <FormContainer>
       <h3 className="d-flex align-items-center">Forgot Password</h3>
-      <Form onSubmit={submitHandler}>
+      <Form onSubmit={submitHandler} autoComplete="off">
         <FormGroup className="my-2" controlId="password">
           <FormLabel>Password</FormLabel>
           <FormControl

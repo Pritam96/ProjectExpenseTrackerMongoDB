@@ -1,9 +1,15 @@
+const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const Expense = require("../models/Expense");
 const Category = require("../models/Category");
 const { Parser } = require("json2csv");
 const moment = require("moment");
 const History = require("../models/History");
+
+const validateObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+const validateDateTime = (dateTime) => {
+  return moment(dateTime, moment.ISO_8601, true).isValid();
+};
 
 const getHistoryData = async (userId) => {
   try {
@@ -25,32 +31,47 @@ const getHistoryData = async (userId) => {
 };
 
 exports.postExpense = asyncHandler(async (req, res, next) => {
-  const { title, amount, category, description } = req.body;
+  const { amount, category, description, date } = req.body;
   const userId = req.user._id;
+
+  if (date && !validateDateTime(date)) {
+    res.status(400);
+    throw new Error("Invalid date format");
+  }
+  const parsedDate = date ? new Date(date) : undefined;
+
+  if (!validateObjectId(category)) {
+    res.status(400);
+    throw new Error("Invalid category ID");
+  }
+  const categoryDocument = await Category.findById(category);
+  if (!categoryDocument) {
+    res.status(400);
+    throw new Error("Category not found");
+  }
 
   const enteredData = {
     user: userId,
-    title,
     amount,
-    category,
+    category: categoryDocument._id,
     description: description || undefined,
+    date: parsedDate,
   };
 
   const expense = await Expense.create(enteredData);
-  const categoryDocument = await Category.findById(expense.category);
 
   const historyData = await getHistoryData(userId);
 
   res.status(201).json({
     expense: {
       _id: expense._id,
-      title: expense.title,
       categoryId: expense.category,
       category: categoryDocument.title,
       amount: expense.amount,
       description: expense.description,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
+      date: expense.date,
+      // createdAt: expense.createdAt,
+      // updatedAt: expense.updatedAt,
     },
     history: historyData,
   });
@@ -59,8 +80,14 @@ exports.postExpense = asyncHandler(async (req, res, next) => {
 exports.getExpenses = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 4;
-  const start = req.query.start ? new Date(req.query.start) : null;
-  const end = req.query.end ? new Date(req.query.end) : null;
+  const start =
+    req.query.start && validateDateTime(req.query.start)
+      ? new Date(req.query.start)
+      : null;
+  const end =
+    req.query.end && validateDateTime(req.query.end)
+      ? new Date(req.query.end)
+      : null;
   const startIndex = (page - 1) * limit;
 
   const userId = req.user._id;
@@ -68,7 +95,7 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
   // Build the base query
   const query = { user: userId };
   if (start && end) {
-    query.createdAt = { $gte: start, $lte: end };
+    query.date = { $gte: start, $lte: end };
   }
 
   const total = await Expense.countDocuments(query);
@@ -80,19 +107,19 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
       path: "category",
       select: "title",
     })
-    .sort({ createdAt: -1 });
+    .sort({ date: -1 });
 
   const historyData = await getHistoryData(userId);
 
   const transformedExpenses = expenses.map((expense) => ({
     _id: expense._id,
-    title: expense.title,
     categoryId: expense.category?._id || null,
     category: expense.category?.title || "Uncategorized",
     amount: expense.amount,
     description: expense.description,
-    createdAt: expense.createdAt,
-    updatedAt: expense.updatedAt,
+    date: expense.date,
+    // createdAt: expense.createdAt,
+    // updatedAt: expense.updatedAt,
   }));
 
   // Build the pagination result
@@ -114,14 +141,26 @@ exports.getExpenses = asyncHandler(async (req, res, next) => {
 
 exports.putEditExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
-  const { title, category, amount, description } = req.body;
+  const { category, amount, description, date } = req.body;
+
+  if (!validateObjectId(expenseId)) {
+    res.status(400);
+    throw new Error("Invalid expense ID");
+  }
+
   const userId = req.user._id;
 
+  if (date && !validateDateTime(date)) {
+    res.status(400);
+    throw new Error("Invalid date format");
+  }
+  const parsedDate = date ? new Date(date) : undefined;
+
   const enteredData = {
-    title,
     amount,
     category,
     description: description || undefined,
+    date: parsedDate,
   };
 
   const expense = await Expense.findByIdAndUpdate(expenseId, enteredData, {
@@ -134,18 +173,23 @@ exports.putEditExpense = asyncHandler(async (req, res, next) => {
   }
 
   const categoryDocument = await Category.findById(category);
+  if (!categoryDocument) {
+    res.status(400);
+    throw new Error("Invalid category ID");
+  }
+
   const historyData = await getHistoryData(userId);
 
   res.status(201).json({
     expense: {
       _id: expense._id,
-      title: expense.title,
+      amount: expense.amount,
       categoryId: expense.category,
       category: categoryDocument.title,
-      amount: expense.amount,
       description: expense.description,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
+      date: expense.date,
+      // createdAt: expense.createdAt,
+      // updatedAt: expense.updatedAt,
     },
     history: historyData,
   });
@@ -155,6 +199,11 @@ exports.deleteExpense = asyncHandler(async (req, res, next) => {
   const { expenseId } = req.params;
   const userId = req.user._id;
 
+  if (!validateObjectId(expenseId)) {
+    res.status(400);
+    throw new Error("Invalid expense ID");
+  }
+
   const expense = await Expense.findByIdAndDelete(expenseId);
   if (!expense) {
     res.status(404);
@@ -163,7 +212,7 @@ exports.deleteExpense = asyncHandler(async (req, res, next) => {
 
   const historyData = await getHistoryData(userId);
 
-  res.status(200).json({
+  res.status(204).json({
     deleted_id: expense._id,
     history: historyData,
   });
@@ -178,10 +227,7 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
     throw new Error("Start date and end date are required.");
   }
 
-  if (
-    !moment(start, moment.ISO_8601, true).isValid() ||
-    !moment(end, moment.ISO_8601, true).isValid()
-  ) {
+  if (!validateDateTime(start) || !validateDateTime(end)) {
     res.status(400);
     throw new Error(
       "Invalid date format. Please provide valid ISO 8601 dates."
@@ -190,10 +236,7 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
 
   const expenses = await Expense.find({
     user: userId,
-    createdAt: {
-      $gte: new Date(start),
-      $lte: new Date(end),
-    },
+    date: { $gte: new Date(start), $lte: new Date(end) },
   }).populate({
     path: "category",
     select: "title",
@@ -203,7 +246,7 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
     {
       $match: {
         user: userId,
-        createdAt: { $gte: new Date(start), $lte: new Date(end) },
+        date: { $gte: new Date(start), $lte: new Date(end) },
       },
     },
     {
@@ -218,32 +261,28 @@ exports.downloadCsv = asyncHandler(async (req, res, next) => {
 
   const transformedExpenses = expenses.map((expense) => ({
     id: expense._id.toString(),
-    title: expense.title,
     category: expense.category.title,
     amount: parseFloat(expense.amount).toFixed(2),
     description: expense.description ? expense.description : "",
-    created: moment(expense.createdAt).format("MMMM Do YYYY, h:mm:ss a"),
-    updated: moment(expense.updatedAt).format("MMMM Do YYYY, h:mm:ss a"),
+    date: moment(expense.date).format("MMMM Do YYYY, h:mm:ss a"),
   }));
 
   transformedExpenses.push({
-    id: "",
-    title: "Total Expense",
-    category: "",
-    amount: totalExpense,
-    description: "",
-    created: "",
-    updated: "",
+    id: "Total",
+    amount: totalExpense.toFixed(2),
+    category: "-",
+    description: "-",
+    date: `${moment(start).format("YYYY-MM-DD")} - ${moment(end).format(
+      "YYYY-MM-DD"
+    )}`,
   });
 
   const csvFields = [
     { label: "ID", value: "id" },
-    { label: "Title", value: "title" },
-    { label: "Category", value: "category" },
     { label: "Amount", value: "amount" },
+    { label: "Category", value: "category" },
     { label: "Description", value: "description" },
-    { label: "Created", value: "created" },
-    { label: "Updated", value: "updated" },
+    { label: "Date", value: "date" },
   ];
 
   const csvParser = new Parser({ fields: csvFields });

@@ -13,7 +13,7 @@ const Expenses = () => {
   );
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && message.trim()) {
       toast.success(message);
       dispatch(resetToInitialState());
     }

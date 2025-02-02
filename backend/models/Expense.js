@@ -4,26 +4,27 @@ const History = require("./History");
 
 const ExpenseSchema = new Schema(
   {
-    title: {
-      type: String,
-      required: [true, "Title is required"],
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: [true, "Amount is required"],
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: [true, "Category is required"],
     },
-    amount: {
-      type: Number,
-      required: [true, "Amount is required"],
-    },
     description: {
       type: String,
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    date: {
+      type: Date,
+      required: [true, "Date is required"],
+      default: Date.now,
     },
   },
   { timestamps: true }

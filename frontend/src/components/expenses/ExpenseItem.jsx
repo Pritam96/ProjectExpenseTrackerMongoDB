@@ -4,7 +4,6 @@ import {
   Card,
   CardBody,
   CardSubtitle,
-  CardText,
   CardTitle,
   Col,
   Row,
@@ -17,7 +16,7 @@ import {
 } from "../../features/expense/expenseSlice";
 import { useEffect, useState } from "react";
 
-const ExpenseItem = ({ expense }) => {
+const ExpenseItem = ({ expense, showButtons }) => {
   const [editBtnClick, setEditBtnClick] = useState(false);
   const { editData } = useSelector((state) => state.expenses);
 
@@ -47,20 +46,21 @@ const ExpenseItem = ({ expense }) => {
     <Card className="mt-3 shadow" style={cardStyles}>
       <CardBody>
         <Row>
-          <Col xs={3} className="d-flex align-items-center">
+          <Col xs={showButtons ? 3 : 4} className="d-flex align-items-center">
             <CardTitle>
               <h3>₹{parseFloat(expense.amount).toFixed(2)}</h3>
             </CardTitle>
           </Col>
-          <Col xs={6}>
-            <Row>
-              <CardSubtitle>
-                <h4>{expense.title}</h4>
-              </CardSubtitle>
-            </Row>
+          <Col xs={showButtons ? 6 : 8}>
             {expense?.description && (
               <Row>
-                <CardText>{expense.description}</CardText>
+                <CardSubtitle>
+                  {showButtons ? (
+                    <h4>{expense.description}</h4>
+                  ) : (
+                    <h5>{expense.description}</h5>
+                  )}
+                </CardSubtitle>
               </Row>
             )}
             <Row className="d-flex justify-content-between mt-2 px-2">
@@ -68,32 +68,34 @@ const ExpenseItem = ({ expense }) => {
                 {expense.category}
               </Badge>
               <Badge bg={dateBadgeColor}>
-                {moment(expense.createdAt).fromNow()}
+                {moment(expense.date).fromNow()}
               </Badge>
             </Row>
           </Col>
-          <Col xs={3}>
-            <div className="d-grid gap-2">
-              <Button
-                type="button"
-                variant="info"
-                size="sm"
-                onClick={editHandler}
-                disabled={editData}
-              >
-                Edit
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                onClick={deleteHandler}
-                disabled={editData}
-              >
-                Delete
-              </Button>
-            </div>
-          </Col>
+          {showButtons && (
+            <Col xs={3}>
+              <div className="d-grid gap-2">
+                <Button
+                  type="button"
+                  variant="info"
+                  size="sm"
+                  onClick={editHandler}
+                  disabled={editData}
+                >
+                  Edit
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  onClick={deleteHandler}
+                  disabled={editData}
+                >
+                  Delete
+                </Button>
+              </div>
+            </Col>
+          )}
         </Row>
       </CardBody>
     </Card>

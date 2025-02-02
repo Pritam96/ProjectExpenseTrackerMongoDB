@@ -95,7 +95,7 @@ const ExpenseList = () => {
         ) : expenses.length !== 0 ? (
           expenses.map((expense) => (
             <div key={expense._id}>
-              <ExpenseItem expense={expense} />
+              <ExpenseItem expense={expense} showButtons={true} />
             </div>
           ))
         ) : (

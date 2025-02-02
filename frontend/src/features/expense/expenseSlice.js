@@ -209,7 +209,7 @@ const expenseSlice = createSlice({
       .addCase(getExpenses.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.message = "Expenses fetched successfully";
+        // state.message = "Expenses fetched successfully";
 
         state.expenses = action.payload.expenses;
         state.pagination = action.payload.pagination;

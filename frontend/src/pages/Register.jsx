@@ -72,7 +72,7 @@ const Register = () => {
         <FaUserPlus className="me-2" />
         Register
       </h3>
-      <Form onSubmit={submitHandler}>
+      <Form onSubmit={submitHandler} autoComplete="off">
         <Input
           id="usernameInput"
           label="Username"

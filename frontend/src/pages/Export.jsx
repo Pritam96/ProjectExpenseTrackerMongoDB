@@ -1,7 +1,5 @@
 import {
   Button,
-  Card,
-  CardBody,
   Col,
   Container,
   FormSelect,
@@ -19,8 +17,8 @@ import {
   resetToInitialState,
 } from "../features/expense/expenseSlice";
 import { toast } from "react-toastify";
-import ExpenseItemLite from "../components/expenses/ExpenseItemLite";
 import moment from "moment";
+import ExpenseItem from "../components/expenses/ExpenseItem";
 
 const Export = () => {
   const [startDate, setStartDate] = useState("");
@@ -41,11 +39,14 @@ const Export = () => {
   useEffect(() => {
     dispatch(resetForExport());
     if (startDate && endDate) {
+      const formattedStartDate = moment(startDate).startOf("day").toISOString();
+      const formattedEndDate = moment(endDate).endOf("day").toISOString();
+
       dispatch(
         getExpenses({
           dateRange: {
-            start: moment(startDate).toISOString(),
-            end: moment(endDate).toISOString(),
+            start: formattedStartDate,
+            end: formattedEndDate,
           },
           pagination: {
             page: pagination.current || 1,
@@ -58,11 +59,14 @@ const Export = () => {
 
   const handlePageChange = useCallback(
     (page) => {
+      const formattedStartDate = moment(startDate).startOf("day").toISOString();
+      const formattedEndDate = moment(endDate).endOf("day").toISOString();
+
       dispatch(
         getExpenses({
           dateRange: {
-            start: moment(startDate).toISOString(),
-            end: moment(endDate).toISOString(),
+            start: formattedStartDate,
+            end: formattedEndDate,
           },
           pagination: {
             page: page,
@@ -75,10 +79,13 @@ const Export = () => {
   );
 
   const downloadHandler = () => {
+    const formattedStartDate = moment(startDate).startOf("day").toISOString();
+    const formattedEndDate = moment(endDate).endOf("day").toISOString();
+
     dispatch(
       exportExpenses({
-        start: moment(startDate).toISOString(),
-        end: moment(endDate).toISOString(),
+        start: formattedStartDate,
+        end: formattedEndDate,
       })
     );
   };
@@ -136,11 +143,15 @@ const Export = () => {
               ) : expenses.length > 0 ? (
                 expenses.map((expense) => (
                   <div key={expense._id}>
-                    <ExpenseItemLite expense={expense} />
+                    <ExpenseItem expense={expense} showButtons={false} />
                   </div>
                 ))
               ) : (
-                <div className="h5 mt-5 text-center">No expenses found!</div>
+                <div className="h5 mt-5 text-center">
+                  {!startDate || !endDate
+                    ? "Choose a range to view expenses "
+                    : "No expenses found!"}
+                </div>
               )}
             </Row>
             <Row>
