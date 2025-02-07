@@ -15,6 +15,7 @@ import { useState } from "react";
 
 const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
   const [editBtnClick, setEditBtnClick] = useState(false);
+  const [showRelativeTime, setShowRelativeTime] = useState(true);
 
   const dispatch = useDispatch();
 
@@ -57,8 +58,14 @@ const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
               <Badge bg={categoryBadgeColor} className="mb-2">
                 {expense.category}
               </Badge>
-              <Badge bg={dateBadgeColor}>
-                {moment(expense.date).fromNow()}
+              <Badge
+                pill
+                bg={dateBadgeColor}
+                onClick={() => setShowRelativeTime((prevState) => !prevState)}
+              >
+                {showRelativeTime
+                  ? moment(expense.date).fromNow()
+                  : moment(expense.date).format("MMM Do YYYY, h:mm:ss a")}
               </Badge>
             </Row>
           </Col>

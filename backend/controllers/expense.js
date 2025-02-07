@@ -212,10 +212,7 @@ exports.deleteExpense = asyncHandler(async (req, res, next) => {
 
   const historyData = await getHistoryData(userId);
 
-  res.status(204).json({
-    deleted_id: expense._id,
-    history: historyData,
-  });
+  res.status(202).json({ expenseId, history: historyData });
 });
 
 exports.downloadCsv = asyncHandler(async (req, res, next) => {

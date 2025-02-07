@@ -8,8 +8,8 @@ const addExpense = async (expenseData, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axios.post(`${API_URL}/`, expenseData, config);
-  return response.data;
+  const { data } = await axios.post(`${API_URL}/`, expenseData, config);
+  return data;
 };
 
 const getExpenses = async ({ dateRange, pagination } = {}, token) => {
@@ -30,8 +30,8 @@ const getExpenses = async ({ dateRange, pagination } = {}, token) => {
 
   const URL = `${API_URL}/?${params.toString()}`;
 
-  const response = await axios.get(URL, config);
-  return response.data;
+  const { data } = await axios.get(URL, config);
+  return data;
 };
 
 const editExpense = async (expenseId, expenseData, token) => {
@@ -40,12 +40,12 @@ const editExpense = async (expenseId, expenseData, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axios.put(
+  const { data } = await axios.put(
     `${API_URL}/${expenseId}`,
     expenseData,
     config
   );
-  return response.data;
+  return data;
 };
 
 const deleteExpense = async (expenseId, token) => {
@@ -54,8 +54,8 @@ const deleteExpense = async (expenseId, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axios.delete(`${API_URL}/${expenseId}`, config);
-  return response.data;
+  const { data } = await axios.delete(`${API_URL}/${expenseId}`, config);
+  return data;
 };
 
 const exportExpenses = async (dateRange, token) => {
@@ -71,8 +71,8 @@ const exportExpenses = async (dateRange, token) => {
     params.append("end", dateRange.end);
   }
   const URL = `${API_URL}/export?${params.toString()}`;
-  const response = await axios.get(URL, config);
-  return response.data;
+  const { data } = await axios.get(URL, config);
+  return data;
 };
 
 const authService = {

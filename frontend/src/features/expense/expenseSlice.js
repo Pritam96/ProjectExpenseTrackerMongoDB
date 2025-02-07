@@ -215,15 +215,15 @@ const expenseSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(deleteExpense.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.message = "Expense deleted successfully";
-
         state.expenses = state.expenses.filter(
-          (expense) => expense._id !== action.payload.deleted_id
+          (expense) => expense._id !== action.payload.expenseId
         );
         state.count = Math.max(0, state.count - 1);
         state.history = action.payload.history || {};
+
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = "Expense deleted successfully";
       })
       .addCase(deleteExpense.rejected, (state, action) => {
         state.isLoading = false;
