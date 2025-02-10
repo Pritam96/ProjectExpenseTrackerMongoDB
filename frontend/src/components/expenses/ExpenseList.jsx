@@ -12,7 +12,6 @@ const ExpenseList = ({ expenseId, setExpenseId }) => {
   const { expenses, count, isLoading, pagination } = useSelector(
     (state) => state.expenses
   );
-  const { editData } = useSelector((state) => state.expenses);
 
   const dateRanges = useMemo(
     () => ({
@@ -88,11 +87,12 @@ const ExpenseList = ({ expenseId, setExpenseId }) => {
         </Col>
       </Row>
       <Row>
-        {isLoading ? (
-          <Container className="d-flex justify-content-center align-items-center mt-5">
+        {isLoading && (
+          <Container className="d-flex justify-content-center align-items-center my-2">
             <Spinner animation="border" />
           </Container>
-        ) : expenses.length !== 0 ? (
+        )}
+        {expenses &&
           expenses.map((expense) => (
             <div key={expense._id}>
               <ExpenseItem
@@ -102,12 +102,12 @@ const ExpenseList = ({ expenseId, setExpenseId }) => {
                 setExpenseId={setExpenseId}
               />
             </div>
-          ))
-        ) : (
+          ))}
+        {!isLoading && !expenses?.length && (
           <div className="h5 mt-5 text-center">No expenses found!</div>
         )}
       </Row>
-      {!isLoading && !editData && expenses.length > 0 && (
+      {!isLoading && expenses.length && (
         <Row>
           <PaginationComponent
             pagination={pagination}

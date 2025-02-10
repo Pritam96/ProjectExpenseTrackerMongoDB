@@ -47,7 +47,7 @@ const ExpenseForm = ({ expenseId, setExpenseId }) => {
     } else {
       resetForm();
     }
-  }, [expenseData]);
+  }, [expenseId]);
 
   const formHandler = (e) => {
     e.preventDefault();
@@ -72,10 +72,11 @@ const ExpenseForm = ({ expenseId, setExpenseId }) => {
           expenseData: data,
         })
       );
+      resetForm();
     } else {
       dispatch(createExpense(data));
+      resetForm();
     }
-    resetForm();
   };
 
   const resetForm = () => {
@@ -190,7 +191,7 @@ const ExpenseForm = ({ expenseId, setExpenseId }) => {
             Save
           </Button>
 
-          {expenseData && (
+          {expenseId && (
             <Button type="button" variant="secondary" onClick={resetForm}>
               Cancel
             </Button>

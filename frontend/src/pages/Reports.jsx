@@ -32,10 +32,10 @@ const Reports = () => {
     <>
       <Container>
         <Row>
-          <Col md={4} className="mt-4">
+          <Col md={3} lg={3} className="mt-4">
             <h3>Leader-Board</h3>
           </Col>
-          <Col md={8}>
+          <Col md={9} lg={9}>
             <Row>
               {isLoading ? (
                 <Container className="d-flex justify-content-center align-items-center mt-5">
@@ -47,12 +47,12 @@ const Reports = () => {
                     <Card className="mt-3 shadow">
                       <CardBody>
                         <Row className="flex-row align-items-center justify-content-between">
-                          <Col md={3} sm={3} xs={3}>
+                          <Col lg={3} md={3} sm={3} xs={3}>
                             <CardText className="h3 text-center">
                               {item.position}
                             </CardText>
                           </Col>
-                          <Col md={6} sm={6} xs={6}>
+                          <Col lg={6} md={6} sm={6} xs={6}>
                             <Row>
                               <CardText className="h5">
                                 {item.username}
@@ -69,7 +69,7 @@ const Reports = () => {
                               </CardText>
                             </Row>
                           </Col>
-                          <Col md={3} sm={3} xs={3}>
+                          <Col lg={3} md={3} sm={3} xs={3}>
                             <CardText className="h2">
                               ₹{parseFloat(item.totalAmount).toFixed(2)}
                             </CardText>

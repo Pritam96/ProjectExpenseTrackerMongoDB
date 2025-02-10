@@ -14,6 +14,10 @@ const Expenses = () => {
   );
 
   useEffect(() => {
+    if (!expenseId) setExpenseId(null);
+  }, [expenseId]);
+
+  useEffect(() => {
     if (isSuccess && message.trim()) {
       toast.success(message);
       dispatch(resetToInitialState());
@@ -28,10 +32,10 @@ const Expenses = () => {
     <>
       <Container>
         <Row>
-          <Col md={4} className="mt-4">
+          <Col lg={4} className="mt-4">
             <ExpenseForm expenseId={expenseId} setExpenseId={setExpenseId} />
           </Col>
-          <Col md={8}>
+          <Col lg={8}>
             <ExpenseList expenseId={expenseId} setExpenseId={setExpenseId} />
           </Col>
         </Row>

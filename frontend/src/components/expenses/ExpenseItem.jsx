@@ -7,6 +7,7 @@ import {
   CardTitle,
   Col,
   Row,
+  Stack,
 } from "react-bootstrap";
 import moment from "moment";
 import { useDispatch } from "react-redux";
@@ -14,13 +15,12 @@ import { deleteExpense } from "../../features/expense/expenseSlice";
 import { useState } from "react";
 
 const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
-  const [editBtnClick, setEditBtnClick] = useState(false);
   const [showRelativeTime, setShowRelativeTime] = useState(true);
-
   const dispatch = useDispatch();
 
+  const isEditMode = expenseId === expense._id;
+
   const editHandler = () => {
-    setEditBtnClick(true);
     setExpenseId(expense._id);
   };
 
@@ -28,10 +28,7 @@ const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
     dispatch(deleteExpense(expense._id));
   };
 
-  const cardStyles = editBtnClick ? { backgroundColor: "#e0f7fa" } : {};
-
-  const categoryBadgeColor = editBtnClick ? "warning" : "success";
-  const dateBadgeColor = editBtnClick ? "info" : "secondary";
+  const cardStyles = isEditMode ? { backgroundColor: "#e0f7fa" } : {};
 
   return (
     <Card className="mt-3 shadow" style={cardStyles}>
@@ -42,32 +39,32 @@ const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
               <h3>₹{parseFloat(expense.amount).toFixed(2)}</h3>
             </CardTitle>
           </Col>
-          <Col xs={showButtons ? 6 : 8}>
+          <Col xs={showButtons ? 6 : 8} className="m-auto">
             {expense?.description && (
-              <Row>
-                <CardSubtitle>
-                  {showButtons ? (
-                    <h4>{expense.description}</h4>
-                  ) : (
-                    <h5>{expense.description}</h5>
-                  )}
-                </CardSubtitle>
-              </Row>
+              <CardSubtitle>
+                {showButtons ? (
+                  <h4>{expense.description}</h4>
+                ) : (
+                  <h5>{expense.description}</h5>
+                )}
+              </CardSubtitle>
             )}
-            <Row className="d-flex justify-content-between mt-2 px-2">
-              <Badge bg={categoryBadgeColor} className="mb-2">
+            <Stack direction="horizontal" gap={2} className="mt-3">
+              <Badge bg={isEditMode ? "warning" : "success"}>
                 {expense.category}
               </Badge>
               <Badge
                 pill
-                bg={dateBadgeColor}
+                as={Button}
+                bg={isEditMode ? "info" : "secondary"}
                 onClick={() => setShowRelativeTime((prevState) => !prevState)}
+                style={{ cursor: "pointer" }}
               >
                 {showRelativeTime
                   ? moment(expense.date).fromNow()
                   : moment(expense.date).format("MMM Do YYYY, h:mm:ss a")}
               </Badge>
-            </Row>
+            </Stack>
           </Col>
           {showButtons && (
             <Col xs={3}>
@@ -77,7 +74,7 @@ const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
                   variant="info"
                   size="sm"
                   onClick={editHandler}
-                  disabled={expenseId}
+                  disabled={isEditMode}
                 >
                   Edit
                 </Button>
@@ -86,7 +83,7 @@ const ExpenseItem = ({ expense, expenseId, setExpenseId, showButtons }) => {
                   variant="danger"
                   size="sm"
                   onClick={deleteHandler}
-                  disabled={expenseId}
+                  disabled={isEditMode}
                 >
                   Delete
                 </Button>
